@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" style="background: black">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>THREE</title>
+    
+    <!-- Loaded by Vite -->
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <script type="module" crossorigin src="./assets/index-eebb3fd4.js"></script>
+    <link rel="stylesheet" href="./assets/index-b0befab5.css">
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    
+    <div style="position: absolute; top: 0; left: 0; width: 100%; color: white; font-family: sans-serif; text-align: center;">
+      <p>Use ctrl-click to grab objects :)</p>
+      <p><a style="color: white;" href="https://github.com/EastingAndNorthing/three">GitHub</a></p>
+    </div>
+
+  </body>
+
+  <script type="x-shader/x-vertex" id="vertexShader">
+
+    varying vec3 vWorldPosition;
+
+    void main() {
+
+      vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+      vWorldPosition = worldPosition.xyz;
+
+      gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+
+    }
+
+  </script>
+  
+  <script type="x-shader/x-fragment" id="fragmentShader">
+
+    uniform vec3 topColor;
+    uniform vec3 bottomColor;
+    uniform float offset;
+    uniform float exponent;
+
+    varying vec3 vWorldPosition;
+
+    void main() {
+
+      float h = normalize( vWorldPosition + offset ).y;
+      gl_FragColor = vec4( mix( 
+        bottomColor, 
+        topColor, 
+        max( pow( max( h , 0.0), exponent ), 0.0 
+        ) 
+      ), 1.0 );
+
+    }
+
+  </script>
+</html>
