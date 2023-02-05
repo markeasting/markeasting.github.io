@@ -31147,7 +31147,7 @@ class Game {
       antialias: true
     });
     Game.composer = new EffectComposer(Game.renderer);
-    Game.renderer.setPixelRatio(window.devicePixelRatio);
+    Game.renderer.setPixelRatio(1);
     this.fitContent();
     Game.renderer.shadowMap.enabled = true;
     Game.renderer.shadowMap.type = PCFSoftShadowMap;
@@ -31195,9 +31195,6 @@ class Game {
       if (this.debugPhysics)
         this.scene.world.draw(Game.renderer, this.scene.camera);
     }
-    requestAnimationFrame((time2) => {
-      this.update(time2);
-    });
   }
   onMouse(e) {
     e.preventDefault();
@@ -32519,7 +32516,7 @@ class CollisionPair {
 class ContactSet {
   A;
   B;
-  plane;
+  // plane: Plane;
   lambda = 0;
   //  λ   - lambda
   lambda_n = 0;
@@ -32560,17 +32557,18 @@ class ContactSet {
   vn = 0;
   e = 0;
   // Coefficient of restitution
-  friction = 0;
+  staticFriction = 0;
+  dynamicFriction = 0;
   F = new Vec3(0, 0, 0);
   // Current constraint force
   Fn = 0;
   // Current constraint force (normal direction) == -contact.lambda_n / (h * h);
-  constructor(A, B, contactPlane) {
+  constructor(A, B, normal) {
     if (A === B || A.id == B.id)
       throw new Error("Cannot create a ContactSet with the same body");
     this.A = A;
     this.B = B;
-    this.plane = contactPlane;
+    this.n = normal.clone();
   }
   update() {
     const A = this.A;
@@ -32800,11 +32798,12 @@ class XPBDSolver extends BaseSolver {
               case ColliderType.Plane: {
                 const MC = A.collider;
                 const PC = B.collider;
+                const N = PC.normal;
                 let deepestPenetration = 0;
                 for (let i = 0; i < MC.uniqueIndices.length; i++) {
                   const v = MC.vertices[MC.uniqueIndices[i]];
                   const contactPointW = CoordinateSystem.localToWorld(v, A.pose.q, A.pose.p);
-                  const signedDistance = PC.plane.distanceToPoint(contactPointW);
+                  const signedDistance = contactPointW.clone().sub(B.pose.p).dot(N);
                   deepestPenetration = Math.min(deepestPenetration, signedDistance);
                 }
                 if (deepestPenetration < collisionMargin) {
@@ -32840,7 +32839,7 @@ class XPBDSolver extends BaseSolver {
   _meshPlaneContact(contacts, A, B) {
     const MC = A.collider;
     const PC = B.collider;
-    const N = new Vec3().copy(PC.plane.normal);
+    const N = new Vec3().copy(PC.normal);
     for (let i = 0; i < MC.uniqueIndices.length; i++) {
       const v = MC.vertices[MC.uniqueIndices[i]];
       const r1 = v;
@@ -32851,8 +32850,7 @@ class XPBDSolver extends BaseSolver {
       const d = -signedDistance;
       if (d <= 0)
         continue;
-      const contact = new ContactSet(A, B, PC.plane);
-      contact.n = N.clone();
+      const contact = new ContactSet(A, B, N);
       contact.d = signedDistance;
       contact.r1 = r1;
       contact.r2 = r2;
@@ -32864,7 +32862,8 @@ class XPBDSolver extends BaseSolver {
       );
       contact.vn = contact.vrel.dot(contact.n);
       contact.e = 0.5 * (A.bounciness + B.bounciness);
-      contact.friction = 0.5 * (A.staticFriction + B.staticFriction);
+      contact.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
+      contact.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
       this.debugContact(contact);
       contacts.push(contact);
     }
@@ -32894,18 +32893,18 @@ class XPBDSolver extends BaseSolver {
     contact.lambda_n += delta_lambda;
   }
   _solveFriction(contact, h) {
-    const p1prev = contact.p1;
-    const p2prev = contact.p1;
+    const p1prev = contact.p1.clone();
+    const p2prev = contact.p2.clone();
     contact.update();
     const dp = Vec3.sub(
       Vec3.sub(contact.p1, p1prev),
-      Vec3.sub(contact.p1, p2prev)
+      Vec3.sub(contact.p2, p2prev)
     );
     const dp_t = Vec3.sub(
-      Vec3.mul(contact.n, contact.n.dot(dp)),
-      dp
+      dp,
+      Vec3.mul(contact.n, dp.dot(contact.n))
     );
-    if (contact.lambda_t > contact.friction * contact.lambda_n) {
+    if (contact.lambda_t < contact.staticFriction * contact.lambda_n) {
       XPBDSolver.applyBodyPairCorrection(
         contact.A,
         contact.B,
@@ -32920,6 +32919,7 @@ class XPBDSolver extends BaseSolver {
   }
   solveVelocities(contacts, h) {
     for (const contact of contacts) {
+      contact.update();
       const dv = new Vec3();
       const v = Vec3.sub(
         contact.A.getVelocityAt(contact.p1),
@@ -32928,8 +32928,8 @@ class XPBDSolver extends BaseSolver {
       const vn = Vec3.dot(v, contact.n);
       const vt = Vec3.sub(v, Vec3.mul(contact.n, vn));
       const Fn = -contact.lambda_n / (h * h);
-      const friction = Math.min(h * contact.friction * Fn, vt.length());
-      dv.sub(Vec3.normalize(vt).mul(friction));
+      const friction = Math.min(h * contact.dynamicFriction * Fn, vt.length());
+      dv.sub(Vec3.normalize(vt).multiplyScalar(friction));
       const threshold = 2 * 9.81 * h;
       const e = Math.abs(vn) <= threshold ? 0 : contact.e;
       const vn_tilde = contact.vn;
@@ -33272,18 +33272,23 @@ class World {
         this.#grabConstraint.destroy();
         this.#grabConstraint = void 0;
         this.#constraintsFast.pop();
+        document.getElementById("constraint-force").innerText = "";
       }
     });
   }
   add(body) {
     const len = this.bodies.push(body);
-    body.id = len;
+    body.id = len - 1;
   }
   addConstraint(constraint) {
     this.#constraintsFast.push(...constraint.constraints);
   }
   update(dt) {
     this.solver.update(this.#bodies, this.#constraintsFast, dt, this.gravity);
+    if (this.#grabConstraint) {
+      const F = this.#grabConstraint?.getForce(XPBDSolver.h).length().toFixed(2);
+      document.getElementById("constraint-force").innerText = `Grab force: ${F} N`;
+    }
   }
   draw(renderer, camera) {
     renderer.autoClear = false;
@@ -33312,7 +33317,7 @@ class BaseScene {
       this.orbitControls.target.copy(state.target);
       this.orbitControls.update();
     } else {
-      this.camera.position.set(2, 5, 1);
+      this.camera.position.set(5, 5, 5);
     }
     Game.events.on(RayCastEvent, (e) => {
       this.orbitControls.enabled = false;
@@ -33575,10 +33580,6 @@ class RigidBody {
     );
     if (dq.w < 0)
       this.omega.set(-this.omega.x, -this.omega.y, -this.omega.z);
-    if (this.vel.length() < 5e-3)
-      this.vel.multiplyScalar(0);
-    if (this.omega.length() < 5e-3)
-      this.omega.multiplyScalar(0);
     this.updateCollider();
   }
   applyForceW(force, worldPos = new Vec3(0, 0, 0)) {
@@ -33680,11 +33681,12 @@ class AlignAxes extends BaseConstraint {
 }
 
 class MyScene extends BaseScene {
+  unitCube;
   constructor() {
     super();
   }
   init() {
-    const lookAt = new Vec3(0, 1, 0);
+    const lookAt = new Vec3(0, 0.5, 0);
     this.camera.lookAt(lookAt);
     this.orbitControls.target.copy(lookAt);
     this.orbitControls.update();
@@ -33693,8 +33695,10 @@ class MyScene extends BaseScene {
   }
   addGeometry() {
     let b0, b1;
-    b0 = Box(2, 1, 0.08).setPos(0, 1.5, 1);
-    b1 = Box(2, 0.08, 1).setPos(0, 2, 0.5);
+    b0 = Box(1).setPos(3, 3, 3);
+    this.addBody(b0);
+    b0 = Box(2, 1, 0.05).setPos(3, 1.5, 1);
+    b1 = Box(2, 0.05, 1).setPos(3, 2, 0.5);
     this.addBody(b0);
     this.addBody(b1);
     this.world.addConstraint(
@@ -33757,6 +33761,16 @@ class MyScene extends BaseScene {
 const style = '';
 
 const game = new Game("canvas");
-game.add(new MyScene());
-game.update(0);
 window.game = game;
+async function init() {
+  const scene = new MyScene();
+  game.add(scene);
+  update(0);
+}
+function update(time) {
+  game.update(time);
+  requestAnimationFrame((time2) => {
+    update(time2);
+  });
+}
+init();
