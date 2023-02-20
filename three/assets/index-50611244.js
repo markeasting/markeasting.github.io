@@ -1359,7 +1359,7 @@ function toComponents( source, target ) {
 
 }
 
-class Color {
+let Color$1 = class Color {
 
 	constructor( r, g, b ) {
 
@@ -1905,9 +1905,9 @@ class Color {
 
 	}
 
-}
+};
 
-Color.NAMES = _colorKeywords;
+Color$1.NAMES = _colorKeywords;
 
 let _canvas;
 
@@ -8877,7 +8877,7 @@ class MeshBasicMaterial extends Material {
 
 		this.type = 'MeshBasicMaterial';
 
-		this.color = new Color( 0xffffff ); // emissive
+		this.color = new Color$1( 0xffffff ); // emissive
 
 		this.map = null;
 
@@ -12914,7 +12914,7 @@ const UniformsLib = {
 
 	common: {
 
-		diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
+		diffuse: { value: /*@__PURE__*/ new Color$1( 0xffffff ) },
 		opacity: { value: 1.0 },
 
 		map: { value: null },
@@ -13007,7 +13007,7 @@ const UniformsLib = {
 		fogDensity: { value: 0.00025 },
 		fogNear: { value: 1 },
 		fogFar: { value: 2000 },
-		fogColor: { value: /*@__PURE__*/ new Color( 0xffffff ) }
+		fogColor: { value: /*@__PURE__*/ new Color$1( 0xffffff ) }
 
 	},
 
@@ -13093,7 +13093,7 @@ const UniformsLib = {
 
 	points: {
 
-		diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
+		diffuse: { value: /*@__PURE__*/ new Color$1( 0xffffff ) },
 		opacity: { value: 1.0 },
 		size: { value: 1.0 },
 		scale: { value: 1.0 },
@@ -13106,7 +13106,7 @@ const UniformsLib = {
 
 	sprite: {
 
-		diffuse: { value: /*@__PURE__*/ new Color( 0xffffff ) },
+		diffuse: { value: /*@__PURE__*/ new Color$1( 0xffffff ) },
 		opacity: { value: 1.0 },
 		center: { value: /*@__PURE__*/ new Vector2( 0.5, 0.5 ) },
 		rotation: { value: 0.0 },
@@ -13152,7 +13152,7 @@ const ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: /*@__PURE__*/ new Color( 0x000000 ) }
+				emissive: { value: /*@__PURE__*/ new Color$1( 0x000000 ) }
 			}
 		] ),
 
@@ -13176,8 +13176,8 @@ const ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: /*@__PURE__*/ new Color( 0x000000 ) },
-				specular: { value: /*@__PURE__*/ new Color( 0x111111 ) },
+				emissive: { value: /*@__PURE__*/ new Color$1( 0x000000 ) },
+				specular: { value: /*@__PURE__*/ new Color$1( 0x111111 ) },
 				shininess: { value: 30 }
 			}
 		] ),
@@ -13203,7 +13203,7 @@ const ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: /*@__PURE__*/ new Color( 0x000000 ) },
+				emissive: { value: /*@__PURE__*/ new Color$1( 0x000000 ) },
 				roughness: { value: 1.0 },
 				metalness: { value: 0.0 },
 				envMapIntensity: { value: 1 } // temporary
@@ -13229,7 +13229,7 @@ const ShaderLib = {
 			UniformsLib.fog,
 			UniformsLib.lights,
 			{
-				emissive: { value: /*@__PURE__*/ new Color( 0x000000 ) }
+				emissive: { value: /*@__PURE__*/ new Color$1( 0x000000 ) }
 			}
 		] ),
 
@@ -13400,7 +13400,7 @@ const ShaderLib = {
 			UniformsLib.lights,
 			UniformsLib.fog,
 			{
-				color: { value: /*@__PURE__*/ new Color( 0x00000 ) },
+				color: { value: /*@__PURE__*/ new Color$1( 0x00000 ) },
 				opacity: { value: 1.0 }
 			},
 		] ),
@@ -13430,7 +13430,7 @@ ShaderLib.physical = {
 			iridescenceThicknessMaximum: { value: 400 },
 			iridescenceThicknessMap: { value: null },
 			sheen: { value: 0 },
-			sheenColor: { value: /*@__PURE__*/ new Color( 0x000000 ) },
+			sheenColor: { value: /*@__PURE__*/ new Color$1( 0x000000 ) },
 			sheenColorMap: { value: null },
 			sheenRoughness: { value: 1 },
 			sheenRoughnessMap: { value: null },
@@ -13441,10 +13441,10 @@ ShaderLib.physical = {
 			thickness: { value: 0 },
 			thicknessMap: { value: null },
 			attenuationDistance: { value: 0 },
-			attenuationColor: { value: /*@__PURE__*/ new Color( 0x000000 ) },
+			attenuationColor: { value: /*@__PURE__*/ new Color$1( 0x000000 ) },
 			specularIntensity: { value: 1 },
 			specularIntensityMap: { value: null },
-			specularColor: { value: /*@__PURE__*/ new Color( 1, 1, 1 ) },
+			specularColor: { value: /*@__PURE__*/ new Color$1( 1, 1, 1 ) },
 			specularColorMap: { value: null },
 		}
 	] ),
@@ -13458,7 +13458,7 @@ const _rgb = { r: 0, b: 0, g: 0 };
 
 function WebGLBackground( renderer, cubemaps, cubeuvmaps, state, objects, alpha, premultipliedAlpha ) {
 
-	const clearColor = new Color( 0x000000 );
+	const clearColor = new Color$1( 0x000000 );
 	let clearAlpha = alpha === true ? 0 : 1;
 
 	let planeMesh;
@@ -14883,7 +14883,7 @@ const EXTRA_LOD_SIGMA = [ 0.125, 0.215, 0.35, 0.446, 0.526, 0.582 ];
 const MAX_SAMPLES = 20;
 
 const _flatCamera = /*@__PURE__*/ new OrthographicCamera();
-const _clearColor = /*@__PURE__*/ new Color();
+const _clearColor = /*@__PURE__*/ new Color$1();
 let _oldTarget = null;
 
 // Golden Ratio
@@ -19661,7 +19661,7 @@ function UniformsCache() {
 				case 'DirectionalLight':
 					uniforms = {
 						direction: new Vector3(),
-						color: new Color()
+						color: new Color$1()
 					};
 					break;
 
@@ -19669,7 +19669,7 @@ function UniformsCache() {
 					uniforms = {
 						position: new Vector3(),
 						direction: new Vector3(),
-						color: new Color(),
+						color: new Color$1(),
 						distance: 0,
 						coneCos: 0,
 						penumbraCos: 0,
@@ -19680,7 +19680,7 @@ function UniformsCache() {
 				case 'PointLight':
 					uniforms = {
 						position: new Vector3(),
-						color: new Color(),
+						color: new Color$1(),
 						distance: 0,
 						decay: 0
 					};
@@ -19689,14 +19689,14 @@ function UniformsCache() {
 				case 'HemisphereLight':
 					uniforms = {
 						direction: new Vector3(),
-						skyColor: new Color(),
-						groundColor: new Color()
+						skyColor: new Color$1(),
+						groundColor: new Color$1()
 					};
 					break;
 
 				case 'RectAreaLight':
 					uniforms = {
-						color: new Color(),
+						color: new Color$1(),
 						position: new Vector3(),
 						halfWidth: new Vector3(),
 						halfHeight: new Vector3()
@@ -28864,7 +28864,7 @@ class LineBasicMaterial extends Material {
 
 		this.type = 'LineBasicMaterial';
 
-		this.color = new Color( 0xffffff );
+		this.color = new Color$1( 0xffffff );
 
 		this.linewidth = 1;
 		this.linecap = 'round';
@@ -29558,8 +29558,8 @@ class MeshPhongMaterial extends Material {
 
 		this.type = 'MeshPhongMaterial';
 
-		this.color = new Color( 0xffffff ); // diffuse
-		this.specular = new Color( 0x111111 );
+		this.color = new Color$1( 0xffffff ); // diffuse
+		this.specular = new Color$1( 0x111111 );
 		this.shininess = 30;
 
 		this.map = null;
@@ -29570,7 +29570,7 @@ class MeshPhongMaterial extends Material {
 		this.aoMap = null;
 		this.aoMapIntensity = 1.0;
 
-		this.emissive = new Color( 0x000000 );
+		this.emissive = new Color$1( 0x000000 );
 		this.emissiveIntensity = 1.0;
 		this.emissiveMap = null;
 
@@ -29672,7 +29672,7 @@ class Light extends Object3D {
 
 		this.type = 'Light';
 
-		this.color = new Color( color );
+		this.color = new Color$1( color );
 		this.intensity = intensity;
 
 	}
@@ -30273,6 +30273,117 @@ class Spherical {
 
 }
 
+const _startP = /*@__PURE__*/ new Vector3();
+const _startEnd = /*@__PURE__*/ new Vector3();
+
+class Line3 {
+
+	constructor( start = new Vector3(), end = new Vector3() ) {
+
+		this.start = start;
+		this.end = end;
+
+	}
+
+	set( start, end ) {
+
+		this.start.copy( start );
+		this.end.copy( end );
+
+		return this;
+
+	}
+
+	copy( line ) {
+
+		this.start.copy( line.start );
+		this.end.copy( line.end );
+
+		return this;
+
+	}
+
+	getCenter( target ) {
+
+		return target.addVectors( this.start, this.end ).multiplyScalar( 0.5 );
+
+	}
+
+	delta( target ) {
+
+		return target.subVectors( this.end, this.start );
+
+	}
+
+	distanceSq() {
+
+		return this.start.distanceToSquared( this.end );
+
+	}
+
+	distance() {
+
+		return this.start.distanceTo( this.end );
+
+	}
+
+	at( t, target ) {
+
+		return this.delta( target ).multiplyScalar( t ).add( this.start );
+
+	}
+
+	closestPointToPointParameter( point, clampToLine ) {
+
+		_startP.subVectors( point, this.start );
+		_startEnd.subVectors( this.end, this.start );
+
+		const startEnd2 = _startEnd.dot( _startEnd );
+		const startEnd_startP = _startEnd.dot( _startP );
+
+		let t = startEnd_startP / startEnd2;
+
+		if ( clampToLine ) {
+
+			t = clamp( t, 0, 1 );
+
+		}
+
+		return t;
+
+	}
+
+	closestPointToPoint( point, clampToLine, target ) {
+
+		const t = this.closestPointToPointParameter( point, clampToLine );
+
+		return this.delta( target ).multiplyScalar( t ).add( this.start );
+
+	}
+
+	applyMatrix4( matrix ) {
+
+		this.start.applyMatrix4( matrix );
+		this.end.applyMatrix4( matrix );
+
+		return this;
+
+	}
+
+	equals( line ) {
+
+		return line.start.equals( this.start ) && line.end.equals( this.end );
+
+	}
+
+	clone() {
+
+		return new this.constructor().copy( this );
+
+	}
+
+}
+
 class PointLightHelper extends Mesh {
 
 	constructor( light, sphereSize, color ) {
@@ -30505,66 +30616,6 @@ class ArrowHelper extends Object3D {
 		this.line.material.dispose();
 		this.cone.geometry.dispose();
 		this.cone.material.dispose();
-
-	}
-
-}
-
-class AxesHelper extends LineSegments {
-
-	constructor( size = 1 ) {
-
-		const vertices = [
-			0, 0, 0,	size, 0, 0,
-			0, 0, 0,	0, size, 0,
-			0, 0, 0,	0, 0, size
-		];
-
-		const colors = [
-			1, 0, 0,	1, 0.6, 0,
-			0, 1, 0,	0.6, 1, 0,
-			0, 0, 1,	0, 0.6, 1
-		];
-
-		const geometry = new BufferGeometry();
-		geometry.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
-		geometry.setAttribute( 'color', new Float32BufferAttribute( colors, 3 ) );
-
-		const material = new LineBasicMaterial( { vertexColors: true, toneMapped: false } );
-
-		super( geometry, material );
-
-		this.type = 'AxesHelper';
-
-	}
-
-	setColors( xAxisColor, yAxisColor, zAxisColor ) {
-
-		const color = new Color();
-		const array = this.geometry.attributes.color.array;
-
-		color.set( xAxisColor );
-		color.toArray( array, 0 );
-		color.toArray( array, 3 );
-
-		color.set( yAxisColor );
-		color.toArray( array, 6 );
-		color.toArray( array, 9 );
-
-		color.set( zAxisColor );
-		color.toArray( array, 12 );
-		color.toArray( array, 15 );
-
-		this.geometry.attributes.color.needsUpdate = true;
-
-		return this;
-
-	}
-
-	dispose() {
-
-		this.geometry.dispose();
-		this.material.dispose();
 
 	}
 
@@ -31124,6 +31175,2501 @@ class RayCastEvent extends CustomEvent {
   }
 }
 
+/**
+ * dat-gui JavaScript Controller Library
+ * https://github.com/dataarts/dat.gui
+ *
+ * Copyright 2011 Data Arts Team, Google Creative Lab
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
+function ___$insertStyle(css) {
+  if (!css) {
+    return;
+  }
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  var style = document.createElement('style');
+
+  style.setAttribute('type', 'text/css');
+  style.innerHTML = css;
+  document.head.appendChild(style);
+
+  return css;
+}
+
+function colorToString (color, forceCSSHex) {
+  var colorFormat = color.__state.conversionName.toString();
+  var r = Math.round(color.r);
+  var g = Math.round(color.g);
+  var b = Math.round(color.b);
+  var a = color.a;
+  var h = Math.round(color.h);
+  var s = color.s.toFixed(1);
+  var v = color.v.toFixed(1);
+  if (forceCSSHex || colorFormat === 'THREE_CHAR_HEX' || colorFormat === 'SIX_CHAR_HEX') {
+    var str = color.hex.toString(16);
+    while (str.length < 6) {
+      str = '0' + str;
+    }
+    return '#' + str;
+  } else if (colorFormat === 'CSS_RGB') {
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  } else if (colorFormat === 'CSS_RGBA') {
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+  } else if (colorFormat === 'HEX') {
+    return '0x' + color.hex.toString(16);
+  } else if (colorFormat === 'RGB_ARRAY') {
+    return '[' + r + ',' + g + ',' + b + ']';
+  } else if (colorFormat === 'RGBA_ARRAY') {
+    return '[' + r + ',' + g + ',' + b + ',' + a + ']';
+  } else if (colorFormat === 'RGB_OBJ') {
+    return '{r:' + r + ',g:' + g + ',b:' + b + '}';
+  } else if (colorFormat === 'RGBA_OBJ') {
+    return '{r:' + r + ',g:' + g + ',b:' + b + ',a:' + a + '}';
+  } else if (colorFormat === 'HSV_OBJ') {
+    return '{h:' + h + ',s:' + s + ',v:' + v + '}';
+  } else if (colorFormat === 'HSVA_OBJ') {
+    return '{h:' + h + ',s:' + s + ',v:' + v + ',a:' + a + '}';
+  }
+  return 'unknown format';
+}
+
+var ARR_EACH = Array.prototype.forEach;
+var ARR_SLICE = Array.prototype.slice;
+var Common = {
+  BREAK: {},
+  extend: function extend(target) {
+    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
+      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+      keys.forEach(function (key) {
+        if (!this.isUndefined(obj[key])) {
+          target[key] = obj[key];
+        }
+      }.bind(this));
+    }, this);
+    return target;
+  },
+  defaults: function defaults(target) {
+    this.each(ARR_SLICE.call(arguments, 1), function (obj) {
+      var keys = this.isObject(obj) ? Object.keys(obj) : [];
+      keys.forEach(function (key) {
+        if (this.isUndefined(target[key])) {
+          target[key] = obj[key];
+        }
+      }.bind(this));
+    }, this);
+    return target;
+  },
+  compose: function compose() {
+    var toCall = ARR_SLICE.call(arguments);
+    return function () {
+      var args = ARR_SLICE.call(arguments);
+      for (var i = toCall.length - 1; i >= 0; i--) {
+        args = [toCall[i].apply(this, args)];
+      }
+      return args[0];
+    };
+  },
+  each: function each(obj, itr, scope) {
+    if (!obj) {
+      return;
+    }
+    if (ARR_EACH && obj.forEach && obj.forEach === ARR_EACH) {
+      obj.forEach(itr, scope);
+    } else if (obj.length === obj.length + 0) {
+      var key = void 0;
+      var l = void 0;
+      for (key = 0, l = obj.length; key < l; key++) {
+        if (key in obj && itr.call(scope, obj[key], key) === this.BREAK) {
+          return;
+        }
+      }
+    } else {
+      for (var _key in obj) {
+        if (itr.call(scope, obj[_key], _key) === this.BREAK) {
+          return;
+        }
+      }
+    }
+  },
+  defer: function defer(fnc) {
+    setTimeout(fnc, 0);
+  },
+  debounce: function debounce(func, threshold, callImmediately) {
+    var timeout = void 0;
+    return function () {
+      var obj = this;
+      var args = arguments;
+      function delayed() {
+        timeout = null;
+        if (!callImmediately) func.apply(obj, args);
+      }
+      var callNow = callImmediately || !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(delayed, threshold);
+      if (callNow) {
+        func.apply(obj, args);
+      }
+    };
+  },
+  toArray: function toArray(obj) {
+    if (obj.toArray) return obj.toArray();
+    return ARR_SLICE.call(obj);
+  },
+  isUndefined: function isUndefined(obj) {
+    return obj === undefined;
+  },
+  isNull: function isNull(obj) {
+    return obj === null;
+  },
+  isNaN: function (_isNaN) {
+    function isNaN(_x) {
+      return _isNaN.apply(this, arguments);
+    }
+    isNaN.toString = function () {
+      return _isNaN.toString();
+    };
+    return isNaN;
+  }(function (obj) {
+    return isNaN(obj);
+  }),
+  isArray: Array.isArray || function (obj) {
+    return obj.constructor === Array;
+  },
+  isObject: function isObject(obj) {
+    return obj === Object(obj);
+  },
+  isNumber: function isNumber(obj) {
+    return obj === obj + 0;
+  },
+  isString: function isString(obj) {
+    return obj === obj + '';
+  },
+  isBoolean: function isBoolean(obj) {
+    return obj === false || obj === true;
+  },
+  isFunction: function isFunction(obj) {
+    return obj instanceof Function;
+  }
+};
+
+var INTERPRETATIONS = [
+{
+  litmus: Common.isString,
+  conversions: {
+    THREE_CHAR_HEX: {
+      read: function read(original) {
+        var test = original.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'HEX',
+          hex: parseInt('0x' + test[1].toString() + test[1].toString() + test[2].toString() + test[2].toString() + test[3].toString() + test[3].toString(), 0)
+        };
+      },
+      write: colorToString
+    },
+    SIX_CHAR_HEX: {
+      read: function read(original) {
+        var test = original.match(/^#([A-F0-9]{6})$/i);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'HEX',
+          hex: parseInt('0x' + test[1].toString(), 0)
+        };
+      },
+      write: colorToString
+    },
+    CSS_RGB: {
+      read: function read(original) {
+        var test = original.match(/^rgb\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: parseFloat(test[1]),
+          g: parseFloat(test[2]),
+          b: parseFloat(test[3])
+        };
+      },
+      write: colorToString
+    },
+    CSS_RGBA: {
+      read: function read(original) {
+        var test = original.match(/^rgba\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
+        if (test === null) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: parseFloat(test[1]),
+          g: parseFloat(test[2]),
+          b: parseFloat(test[3]),
+          a: parseFloat(test[4])
+        };
+      },
+      write: colorToString
+    }
+  }
+},
+{
+  litmus: Common.isNumber,
+  conversions: {
+    HEX: {
+      read: function read(original) {
+        return {
+          space: 'HEX',
+          hex: original,
+          conversionName: 'HEX'
+        };
+      },
+      write: function write(color) {
+        return color.hex;
+      }
+    }
+  }
+},
+{
+  litmus: Common.isArray,
+  conversions: {
+    RGB_ARRAY: {
+      read: function read(original) {
+        if (original.length !== 3) {
+          return false;
+        }
+        return {
+          space: 'RGB',
+          r: original[0],
+          g: original[1],
+          b: original[2]
+        };
+      },
+      write: function write(color) {
+        return [color.r, color.g, color.b];
+      }
+    },
+    RGBA_ARRAY: {
+      read: function read(original) {
+        if (original.length !== 4) return false;
+        return {
+          space: 'RGB',
+          r: original[0],
+          g: original[1],
+          b: original[2],
+          a: original[3]
+        };
+      },
+      write: function write(color) {
+        return [color.r, color.g, color.b, color.a];
+      }
+    }
+  }
+},
+{
+  litmus: Common.isObject,
+  conversions: {
+    RGBA_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b) && Common.isNumber(original.a)) {
+          return {
+            space: 'RGB',
+            r: original.r,
+            g: original.g,
+            b: original.b,
+            a: original.a
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          r: color.r,
+          g: color.g,
+          b: color.b,
+          a: color.a
+        };
+      }
+    },
+    RGB_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.r) && Common.isNumber(original.g) && Common.isNumber(original.b)) {
+          return {
+            space: 'RGB',
+            r: original.r,
+            g: original.g,
+            b: original.b
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          r: color.r,
+          g: color.g,
+          b: color.b
+        };
+      }
+    },
+    HSVA_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v) && Common.isNumber(original.a)) {
+          return {
+            space: 'HSV',
+            h: original.h,
+            s: original.s,
+            v: original.v,
+            a: original.a
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          h: color.h,
+          s: color.s,
+          v: color.v,
+          a: color.a
+        };
+      }
+    },
+    HSV_OBJ: {
+      read: function read(original) {
+        if (Common.isNumber(original.h) && Common.isNumber(original.s) && Common.isNumber(original.v)) {
+          return {
+            space: 'HSV',
+            h: original.h,
+            s: original.s,
+            v: original.v
+          };
+        }
+        return false;
+      },
+      write: function write(color) {
+        return {
+          h: color.h,
+          s: color.s,
+          v: color.v
+        };
+      }
+    }
+  }
+}];
+var result = void 0;
+var toReturn = void 0;
+var interpret = function interpret() {
+  toReturn = false;
+  var original = arguments.length > 1 ? Common.toArray(arguments) : arguments[0];
+  Common.each(INTERPRETATIONS, function (family) {
+    if (family.litmus(original)) {
+      Common.each(family.conversions, function (conversion, conversionName) {
+        result = conversion.read(original);
+        if (toReturn === false && result !== false) {
+          toReturn = result;
+          result.conversionName = conversionName;
+          result.conversion = conversion;
+          return Common.BREAK;
+        }
+      });
+      return Common.BREAK;
+    }
+  });
+  return toReturn;
+};
+
+var tmpComponent = void 0;
+var ColorMath = {
+  hsv_to_rgb: function hsv_to_rgb(h, s, v) {
+    var hi = Math.floor(h / 60) % 6;
+    var f = h / 60 - Math.floor(h / 60);
+    var p = v * (1.0 - s);
+    var q = v * (1.0 - f * s);
+    var t = v * (1.0 - (1.0 - f) * s);
+    var c = [[v, t, p], [q, v, p], [p, v, t], [p, q, v], [t, p, v], [v, p, q]][hi];
+    return {
+      r: c[0] * 255,
+      g: c[1] * 255,
+      b: c[2] * 255
+    };
+  },
+  rgb_to_hsv: function rgb_to_hsv(r, g, b) {
+    var min = Math.min(r, g, b);
+    var max = Math.max(r, g, b);
+    var delta = max - min;
+    var h = void 0;
+    var s = void 0;
+    if (max !== 0) {
+      s = delta / max;
+    } else {
+      return {
+        h: NaN,
+        s: 0,
+        v: 0
+      };
+    }
+    if (r === max) {
+      h = (g - b) / delta;
+    } else if (g === max) {
+      h = 2 + (b - r) / delta;
+    } else {
+      h = 4 + (r - g) / delta;
+    }
+    h /= 6;
+    if (h < 0) {
+      h += 1;
+    }
+    return {
+      h: h * 360,
+      s: s,
+      v: max / 255
+    };
+  },
+  rgb_to_hex: function rgb_to_hex(r, g, b) {
+    var hex = this.hex_with_component(0, 2, r);
+    hex = this.hex_with_component(hex, 1, g);
+    hex = this.hex_with_component(hex, 0, b);
+    return hex;
+  },
+  component_from_hex: function component_from_hex(hex, componentIndex) {
+    return hex >> componentIndex * 8 & 0xFF;
+  },
+  hex_with_component: function hex_with_component(hex, componentIndex, value) {
+    return value << (tmpComponent = componentIndex * 8) | hex & ~(0xFF << tmpComponent);
+  }
+};
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+  return typeof obj;
+} : function (obj) {
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+};
+
+
+
+
+
+
+
+
+
+
+
+var classCallCheck = function (instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+};
+
+var createClass = function () {
+  function defineProperties(target, props) {
+    for (var i = 0; i < props.length; i++) {
+      var descriptor = props[i];
+      descriptor.enumerable = descriptor.enumerable || false;
+      descriptor.configurable = true;
+      if ("value" in descriptor) descriptor.writable = true;
+      Object.defineProperty(target, descriptor.key, descriptor);
+    }
+  }
+
+  return function (Constructor, protoProps, staticProps) {
+    if (protoProps) defineProperties(Constructor.prototype, protoProps);
+    if (staticProps) defineProperties(Constructor, staticProps);
+    return Constructor;
+  };
+}();
+
+
+
+
+
+
+
+var get = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = Object.getOwnPropertyDescriptor(object, property);
+
+  if (desc === undefined) {
+    var parent = Object.getPrototypeOf(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+
+var inherits = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+  }
+
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+};
+
+
+
+
+
+
+
+
+
+
+
+var possibleConstructorReturn = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && (typeof call === "object" || typeof call === "function") ? call : self;
+};
+
+var Color = function () {
+  function Color() {
+    classCallCheck(this, Color);
+    this.__state = interpret.apply(this, arguments);
+    if (this.__state === false) {
+      throw new Error('Failed to interpret color arguments');
+    }
+    this.__state.a = this.__state.a || 1;
+  }
+  createClass(Color, [{
+    key: 'toString',
+    value: function toString() {
+      return colorToString(this);
+    }
+  }, {
+    key: 'toHexString',
+    value: function toHexString() {
+      return colorToString(this, true);
+    }
+  }, {
+    key: 'toOriginal',
+    value: function toOriginal() {
+      return this.__state.conversion.write(this);
+    }
+  }]);
+  return Color;
+}();
+function defineRGBComponent(target, component, componentHexIndex) {
+  Object.defineProperty(target, component, {
+    get: function get$$1() {
+      if (this.__state.space === 'RGB') {
+        return this.__state[component];
+      }
+      Color.recalculateRGB(this, component, componentHexIndex);
+      return this.__state[component];
+    },
+    set: function set$$1(v) {
+      if (this.__state.space !== 'RGB') {
+        Color.recalculateRGB(this, component, componentHexIndex);
+        this.__state.space = 'RGB';
+      }
+      this.__state[component] = v;
+    }
+  });
+}
+function defineHSVComponent(target, component) {
+  Object.defineProperty(target, component, {
+    get: function get$$1() {
+      if (this.__state.space === 'HSV') {
+        return this.__state[component];
+      }
+      Color.recalculateHSV(this);
+      return this.__state[component];
+    },
+    set: function set$$1(v) {
+      if (this.__state.space !== 'HSV') {
+        Color.recalculateHSV(this);
+        this.__state.space = 'HSV';
+      }
+      this.__state[component] = v;
+    }
+  });
+}
+Color.recalculateRGB = function (color, component, componentHexIndex) {
+  if (color.__state.space === 'HEX') {
+    color.__state[component] = ColorMath.component_from_hex(color.__state.hex, componentHexIndex);
+  } else if (color.__state.space === 'HSV') {
+    Common.extend(color.__state, ColorMath.hsv_to_rgb(color.__state.h, color.__state.s, color.__state.v));
+  } else {
+    throw new Error('Corrupted color state');
+  }
+};
+Color.recalculateHSV = function (color) {
+  var result = ColorMath.rgb_to_hsv(color.r, color.g, color.b);
+  Common.extend(color.__state, {
+    s: result.s,
+    v: result.v
+  });
+  if (!Common.isNaN(result.h)) {
+    color.__state.h = result.h;
+  } else if (Common.isUndefined(color.__state.h)) {
+    color.__state.h = 0;
+  }
+};
+Color.COMPONENTS = ['r', 'g', 'b', 'h', 's', 'v', 'hex', 'a'];
+defineRGBComponent(Color.prototype, 'r', 2);
+defineRGBComponent(Color.prototype, 'g', 1);
+defineRGBComponent(Color.prototype, 'b', 0);
+defineHSVComponent(Color.prototype, 'h');
+defineHSVComponent(Color.prototype, 's');
+defineHSVComponent(Color.prototype, 'v');
+Object.defineProperty(Color.prototype, 'a', {
+  get: function get$$1() {
+    return this.__state.a;
+  },
+  set: function set$$1(v) {
+    this.__state.a = v;
+  }
+});
+Object.defineProperty(Color.prototype, 'hex', {
+  get: function get$$1() {
+    if (this.__state.space !== 'HEX') {
+      this.__state.hex = ColorMath.rgb_to_hex(this.r, this.g, this.b);
+      this.__state.space = 'HEX';
+    }
+    return this.__state.hex;
+  },
+  set: function set$$1(v) {
+    this.__state.space = 'HEX';
+    this.__state.hex = v;
+  }
+});
+
+var Controller = function () {
+  function Controller(object, property) {
+    classCallCheck(this, Controller);
+    this.initialValue = object[property];
+    this.domElement = document.createElement('div');
+    this.object = object;
+    this.property = property;
+    this.__onChange = undefined;
+    this.__onFinishChange = undefined;
+  }
+  createClass(Controller, [{
+    key: 'onChange',
+    value: function onChange(fnc) {
+      this.__onChange = fnc;
+      return this;
+    }
+  }, {
+    key: 'onFinishChange',
+    value: function onFinishChange(fnc) {
+      this.__onFinishChange = fnc;
+      return this;
+    }
+  }, {
+    key: 'setValue',
+    value: function setValue(newValue) {
+      this.object[this.property] = newValue;
+      if (this.__onChange) {
+        this.__onChange.call(this, newValue);
+      }
+      this.updateDisplay();
+      return this;
+    }
+  }, {
+    key: 'getValue',
+    value: function getValue() {
+      return this.object[this.property];
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      return this;
+    }
+  }, {
+    key: 'isModified',
+    value: function isModified() {
+      return this.initialValue !== this.getValue();
+    }
+  }]);
+  return Controller;
+}();
+
+var EVENT_MAP = {
+  HTMLEvents: ['change'],
+  MouseEvents: ['click', 'mousemove', 'mousedown', 'mouseup', 'mouseover'],
+  KeyboardEvents: ['keydown']
+};
+var EVENT_MAP_INV = {};
+Common.each(EVENT_MAP, function (v, k) {
+  Common.each(v, function (e) {
+    EVENT_MAP_INV[e] = k;
+  });
+});
+var CSS_VALUE_PIXELS = /(\d+(\.\d+)?)px/;
+function cssValueToPixels(val) {
+  if (val === '0' || Common.isUndefined(val)) {
+    return 0;
+  }
+  var match = val.match(CSS_VALUE_PIXELS);
+  if (!Common.isNull(match)) {
+    return parseFloat(match[1]);
+  }
+  return 0;
+}
+var dom = {
+  makeSelectable: function makeSelectable(elem, selectable) {
+    if (elem === undefined || elem.style === undefined) return;
+    elem.onselectstart = selectable ? function () {
+      return false;
+    } : function () {};
+    elem.style.MozUserSelect = selectable ? 'auto' : 'none';
+    elem.style.KhtmlUserSelect = selectable ? 'auto' : 'none';
+    elem.unselectable = selectable ? 'on' : 'off';
+  },
+  makeFullscreen: function makeFullscreen(elem, hor, vert) {
+    var vertical = vert;
+    var horizontal = hor;
+    if (Common.isUndefined(horizontal)) {
+      horizontal = true;
+    }
+    if (Common.isUndefined(vertical)) {
+      vertical = true;
+    }
+    elem.style.position = 'absolute';
+    if (horizontal) {
+      elem.style.left = 0;
+      elem.style.right = 0;
+    }
+    if (vertical) {
+      elem.style.top = 0;
+      elem.style.bottom = 0;
+    }
+  },
+  fakeEvent: function fakeEvent(elem, eventType, pars, aux) {
+    var params = pars || {};
+    var className = EVENT_MAP_INV[eventType];
+    if (!className) {
+      throw new Error('Event type ' + eventType + ' not supported.');
+    }
+    var evt = document.createEvent(className);
+    switch (className) {
+      case 'MouseEvents':
+        {
+          var clientX = params.x || params.clientX || 0;
+          var clientY = params.y || params.clientY || 0;
+          evt.initMouseEvent(eventType, params.bubbles || false, params.cancelable || true, window, params.clickCount || 1, 0,
+          0,
+          clientX,
+          clientY,
+          false, false, false, false, 0, null);
+          break;
+        }
+      case 'KeyboardEvents':
+        {
+          var init = evt.initKeyboardEvent || evt.initKeyEvent;
+          Common.defaults(params, {
+            cancelable: true,
+            ctrlKey: false,
+            altKey: false,
+            shiftKey: false,
+            metaKey: false,
+            keyCode: undefined,
+            charCode: undefined
+          });
+          init(eventType, params.bubbles || false, params.cancelable, window, params.ctrlKey, params.altKey, params.shiftKey, params.metaKey, params.keyCode, params.charCode);
+          break;
+        }
+      default:
+        {
+          evt.initEvent(eventType, params.bubbles || false, params.cancelable || true);
+          break;
+        }
+    }
+    Common.defaults(evt, aux);
+    elem.dispatchEvent(evt);
+  },
+  bind: function bind(elem, event, func, newBool) {
+    var bool = newBool || false;
+    if (elem.addEventListener) {
+      elem.addEventListener(event, func, bool);
+    } else if (elem.attachEvent) {
+      elem.attachEvent('on' + event, func);
+    }
+    return dom;
+  },
+  unbind: function unbind(elem, event, func, newBool) {
+    var bool = newBool || false;
+    if (elem.removeEventListener) {
+      elem.removeEventListener(event, func, bool);
+    } else if (elem.detachEvent) {
+      elem.detachEvent('on' + event, func);
+    }
+    return dom;
+  },
+  addClass: function addClass(elem, className) {
+    if (elem.className === undefined) {
+      elem.className = className;
+    } else if (elem.className !== className) {
+      var classes = elem.className.split(/ +/);
+      if (classes.indexOf(className) === -1) {
+        classes.push(className);
+        elem.className = classes.join(' ').replace(/^\s+/, '').replace(/\s+$/, '');
+      }
+    }
+    return dom;
+  },
+  removeClass: function removeClass(elem, className) {
+    if (className) {
+      if (elem.className === className) {
+        elem.removeAttribute('class');
+      } else {
+        var classes = elem.className.split(/ +/);
+        var index = classes.indexOf(className);
+        if (index !== -1) {
+          classes.splice(index, 1);
+          elem.className = classes.join(' ');
+        }
+      }
+    } else {
+      elem.className = undefined;
+    }
+    return dom;
+  },
+  hasClass: function hasClass(elem, className) {
+    return new RegExp('(?:^|\\s+)' + className + '(?:\\s+|$)').test(elem.className) || false;
+  },
+  getWidth: function getWidth(elem) {
+    var style = getComputedStyle(elem);
+    return cssValueToPixels(style['border-left-width']) + cssValueToPixels(style['border-right-width']) + cssValueToPixels(style['padding-left']) + cssValueToPixels(style['padding-right']) + cssValueToPixels(style.width);
+  },
+  getHeight: function getHeight(elem) {
+    var style = getComputedStyle(elem);
+    return cssValueToPixels(style['border-top-width']) + cssValueToPixels(style['border-bottom-width']) + cssValueToPixels(style['padding-top']) + cssValueToPixels(style['padding-bottom']) + cssValueToPixels(style.height);
+  },
+  getOffset: function getOffset(el) {
+    var elem = el;
+    var offset = { left: 0, top: 0 };
+    if (elem.offsetParent) {
+      do {
+        offset.left += elem.offsetLeft;
+        offset.top += elem.offsetTop;
+        elem = elem.offsetParent;
+      } while (elem);
+    }
+    return offset;
+  },
+  isActive: function isActive(elem) {
+    return elem === document.activeElement && (elem.type || elem.href);
+  }
+};
+
+var BooleanController = function (_Controller) {
+  inherits(BooleanController, _Controller);
+  function BooleanController(object, property) {
+    classCallCheck(this, BooleanController);
+    var _this2 = possibleConstructorReturn(this, (BooleanController.__proto__ || Object.getPrototypeOf(BooleanController)).call(this, object, property));
+    var _this = _this2;
+    _this2.__prev = _this2.getValue();
+    _this2.__checkbox = document.createElement('input');
+    _this2.__checkbox.setAttribute('type', 'checkbox');
+    function onChange() {
+      _this.setValue(!_this.__prev);
+    }
+    dom.bind(_this2.__checkbox, 'change', onChange, false);
+    _this2.domElement.appendChild(_this2.__checkbox);
+    _this2.updateDisplay();
+    return _this2;
+  }
+  createClass(BooleanController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var toReturn = get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'setValue', this).call(this, v);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+      this.__prev = this.getValue();
+      return toReturn;
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (this.getValue() === true) {
+        this.__checkbox.setAttribute('checked', 'checked');
+        this.__checkbox.checked = true;
+        this.__prev = true;
+      } else {
+        this.__checkbox.checked = false;
+        this.__prev = false;
+      }
+      return get(BooleanController.prototype.__proto__ || Object.getPrototypeOf(BooleanController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return BooleanController;
+}(Controller);
+
+var OptionController = function (_Controller) {
+  inherits(OptionController, _Controller);
+  function OptionController(object, property, opts) {
+    classCallCheck(this, OptionController);
+    var _this2 = possibleConstructorReturn(this, (OptionController.__proto__ || Object.getPrototypeOf(OptionController)).call(this, object, property));
+    var options = opts;
+    var _this = _this2;
+    _this2.__select = document.createElement('select');
+    if (Common.isArray(options)) {
+      var map = {};
+      Common.each(options, function (element) {
+        map[element] = element;
+      });
+      options = map;
+    }
+    Common.each(options, function (value, key) {
+      var opt = document.createElement('option');
+      opt.innerHTML = key;
+      opt.setAttribute('value', value);
+      _this.__select.appendChild(opt);
+    });
+    _this2.updateDisplay();
+    dom.bind(_this2.__select, 'change', function () {
+      var desiredValue = this.options[this.selectedIndex].value;
+      _this.setValue(desiredValue);
+    });
+    _this2.domElement.appendChild(_this2.__select);
+    return _this2;
+  }
+  createClass(OptionController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var toReturn = get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'setValue', this).call(this, v);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+      return toReturn;
+    }
+  }, {
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (dom.isActive(this.__select)) return this;
+      this.__select.value = this.getValue();
+      return get(OptionController.prototype.__proto__ || Object.getPrototypeOf(OptionController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return OptionController;
+}(Controller);
+
+var StringController = function (_Controller) {
+  inherits(StringController, _Controller);
+  function StringController(object, property) {
+    classCallCheck(this, StringController);
+    var _this2 = possibleConstructorReturn(this, (StringController.__proto__ || Object.getPrototypeOf(StringController)).call(this, object, property));
+    var _this = _this2;
+    function onChange() {
+      _this.setValue(_this.__input.value);
+    }
+    function onBlur() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    _this2.__input = document.createElement('input');
+    _this2.__input.setAttribute('type', 'text');
+    dom.bind(_this2.__input, 'keyup', onChange);
+    dom.bind(_this2.__input, 'change', onChange);
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        this.blur();
+      }
+    });
+    _this2.updateDisplay();
+    _this2.domElement.appendChild(_this2.__input);
+    return _this2;
+  }
+  createClass(StringController, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      if (!dom.isActive(this.__input)) {
+        this.__input.value = this.getValue();
+      }
+      return get(StringController.prototype.__proto__ || Object.getPrototypeOf(StringController.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return StringController;
+}(Controller);
+
+function numDecimals(x) {
+  var _x = x.toString();
+  if (_x.indexOf('.') > -1) {
+    return _x.length - _x.indexOf('.') - 1;
+  }
+  return 0;
+}
+var NumberController = function (_Controller) {
+  inherits(NumberController, _Controller);
+  function NumberController(object, property, params) {
+    classCallCheck(this, NumberController);
+    var _this = possibleConstructorReturn(this, (NumberController.__proto__ || Object.getPrototypeOf(NumberController)).call(this, object, property));
+    var _params = params || {};
+    _this.__min = _params.min;
+    _this.__max = _params.max;
+    _this.__step = _params.step;
+    if (Common.isUndefined(_this.__step)) {
+      if (_this.initialValue === 0) {
+        _this.__impliedStep = 1;
+      } else {
+        _this.__impliedStep = Math.pow(10, Math.floor(Math.log(Math.abs(_this.initialValue)) / Math.LN10)) / 10;
+      }
+    } else {
+      _this.__impliedStep = _this.__step;
+    }
+    _this.__precision = numDecimals(_this.__impliedStep);
+    return _this;
+  }
+  createClass(NumberController, [{
+    key: 'setValue',
+    value: function setValue(v) {
+      var _v = v;
+      if (this.__min !== undefined && _v < this.__min) {
+        _v = this.__min;
+      } else if (this.__max !== undefined && _v > this.__max) {
+        _v = this.__max;
+      }
+      if (this.__step !== undefined && _v % this.__step !== 0) {
+        _v = Math.round(_v / this.__step) * this.__step;
+      }
+      return get(NumberController.prototype.__proto__ || Object.getPrototypeOf(NumberController.prototype), 'setValue', this).call(this, _v);
+    }
+  }, {
+    key: 'min',
+    value: function min(minValue) {
+      this.__min = minValue;
+      return this;
+    }
+  }, {
+    key: 'max',
+    value: function max(maxValue) {
+      this.__max = maxValue;
+      return this;
+    }
+  }, {
+    key: 'step',
+    value: function step(stepValue) {
+      this.__step = stepValue;
+      this.__impliedStep = stepValue;
+      this.__precision = numDecimals(stepValue);
+      return this;
+    }
+  }]);
+  return NumberController;
+}(Controller);
+
+function roundToDecimal(value, decimals) {
+  var tenTo = Math.pow(10, decimals);
+  return Math.round(value * tenTo) / tenTo;
+}
+var NumberControllerBox = function (_NumberController) {
+  inherits(NumberControllerBox, _NumberController);
+  function NumberControllerBox(object, property, params) {
+    classCallCheck(this, NumberControllerBox);
+    var _this2 = possibleConstructorReturn(this, (NumberControllerBox.__proto__ || Object.getPrototypeOf(NumberControllerBox)).call(this, object, property, params));
+    _this2.__truncationSuspended = false;
+    var _this = _this2;
+    var prevY = void 0;
+    function onChange() {
+      var attempted = parseFloat(_this.__input.value);
+      if (!Common.isNaN(attempted)) {
+        _this.setValue(attempted);
+      }
+    }
+    function onFinish() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    function onBlur() {
+      onFinish();
+    }
+    function onMouseDrag(e) {
+      var diff = prevY - e.clientY;
+      _this.setValue(_this.getValue() + diff * _this.__impliedStep);
+      prevY = e.clientY;
+    }
+    function onMouseUp() {
+      dom.unbind(window, 'mousemove', onMouseDrag);
+      dom.unbind(window, 'mouseup', onMouseUp);
+      onFinish();
+    }
+    function onMouseDown(e) {
+      dom.bind(window, 'mousemove', onMouseDrag);
+      dom.bind(window, 'mouseup', onMouseUp);
+      prevY = e.clientY;
+    }
+    _this2.__input = document.createElement('input');
+    _this2.__input.setAttribute('type', 'text');
+    dom.bind(_this2.__input, 'change', onChange);
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__input, 'mousedown', onMouseDown);
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        _this.__truncationSuspended = true;
+        this.blur();
+        _this.__truncationSuspended = false;
+        onFinish();
+      }
+    });
+    _this2.updateDisplay();
+    _this2.domElement.appendChild(_this2.__input);
+    return _this2;
+  }
+  createClass(NumberControllerBox, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      this.__input.value = this.__truncationSuspended ? this.getValue() : roundToDecimal(this.getValue(), this.__precision);
+      return get(NumberControllerBox.prototype.__proto__ || Object.getPrototypeOf(NumberControllerBox.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return NumberControllerBox;
+}(NumberController);
+
+function map(v, i1, i2, o1, o2) {
+  return o1 + (o2 - o1) * ((v - i1) / (i2 - i1));
+}
+var NumberControllerSlider = function (_NumberController) {
+  inherits(NumberControllerSlider, _NumberController);
+  function NumberControllerSlider(object, property, min, max, step) {
+    classCallCheck(this, NumberControllerSlider);
+    var _this2 = possibleConstructorReturn(this, (NumberControllerSlider.__proto__ || Object.getPrototypeOf(NumberControllerSlider)).call(this, object, property, { min: min, max: max, step: step }));
+    var _this = _this2;
+    _this2.__background = document.createElement('div');
+    _this2.__foreground = document.createElement('div');
+    dom.bind(_this2.__background, 'mousedown', onMouseDown);
+    dom.bind(_this2.__background, 'touchstart', onTouchStart);
+    dom.addClass(_this2.__background, 'slider');
+    dom.addClass(_this2.__foreground, 'slider-fg');
+    function onMouseDown(e) {
+      document.activeElement.blur();
+      dom.bind(window, 'mousemove', onMouseDrag);
+      dom.bind(window, 'mouseup', onMouseUp);
+      onMouseDrag(e);
+    }
+    function onMouseDrag(e) {
+      e.preventDefault();
+      var bgRect = _this.__background.getBoundingClientRect();
+      _this.setValue(map(e.clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
+      return false;
+    }
+    function onMouseUp() {
+      dom.unbind(window, 'mousemove', onMouseDrag);
+      dom.unbind(window, 'mouseup', onMouseUp);
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    function onTouchStart(e) {
+      if (e.touches.length !== 1) {
+        return;
+      }
+      dom.bind(window, 'touchmove', onTouchMove);
+      dom.bind(window, 'touchend', onTouchEnd);
+      onTouchMove(e);
+    }
+    function onTouchMove(e) {
+      var clientX = e.touches[0].clientX;
+      var bgRect = _this.__background.getBoundingClientRect();
+      _this.setValue(map(clientX, bgRect.left, bgRect.right, _this.__min, _this.__max));
+    }
+    function onTouchEnd() {
+      dom.unbind(window, 'touchmove', onTouchMove);
+      dom.unbind(window, 'touchend', onTouchEnd);
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.getValue());
+      }
+    }
+    _this2.updateDisplay();
+    _this2.__background.appendChild(_this2.__foreground);
+    _this2.domElement.appendChild(_this2.__background);
+    return _this2;
+  }
+  createClass(NumberControllerSlider, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      var pct = (this.getValue() - this.__min) / (this.__max - this.__min);
+      this.__foreground.style.width = pct * 100 + '%';
+      return get(NumberControllerSlider.prototype.__proto__ || Object.getPrototypeOf(NumberControllerSlider.prototype), 'updateDisplay', this).call(this);
+    }
+  }]);
+  return NumberControllerSlider;
+}(NumberController);
+
+var FunctionController = function (_Controller) {
+  inherits(FunctionController, _Controller);
+  function FunctionController(object, property, text) {
+    classCallCheck(this, FunctionController);
+    var _this2 = possibleConstructorReturn(this, (FunctionController.__proto__ || Object.getPrototypeOf(FunctionController)).call(this, object, property));
+    var _this = _this2;
+    _this2.__button = document.createElement('div');
+    _this2.__button.innerHTML = text === undefined ? 'Fire' : text;
+    dom.bind(_this2.__button, 'click', function (e) {
+      e.preventDefault();
+      _this.fire();
+      return false;
+    });
+    dom.addClass(_this2.__button, 'button');
+    _this2.domElement.appendChild(_this2.__button);
+    return _this2;
+  }
+  createClass(FunctionController, [{
+    key: 'fire',
+    value: function fire() {
+      if (this.__onChange) {
+        this.__onChange.call(this);
+      }
+      this.getValue().call(this.object);
+      if (this.__onFinishChange) {
+        this.__onFinishChange.call(this, this.getValue());
+      }
+    }
+  }]);
+  return FunctionController;
+}(Controller);
+
+var ColorController = function (_Controller) {
+  inherits(ColorController, _Controller);
+  function ColorController(object, property) {
+    classCallCheck(this, ColorController);
+    var _this2 = possibleConstructorReturn(this, (ColorController.__proto__ || Object.getPrototypeOf(ColorController)).call(this, object, property));
+    _this2.__color = new Color(_this2.getValue());
+    _this2.__temp = new Color(0);
+    var _this = _this2;
+    _this2.domElement = document.createElement('div');
+    dom.makeSelectable(_this2.domElement, false);
+    _this2.__selector = document.createElement('div');
+    _this2.__selector.className = 'selector';
+    _this2.__saturation_field = document.createElement('div');
+    _this2.__saturation_field.className = 'saturation-field';
+    _this2.__field_knob = document.createElement('div');
+    _this2.__field_knob.className = 'field-knob';
+    _this2.__field_knob_border = '2px solid ';
+    _this2.__hue_knob = document.createElement('div');
+    _this2.__hue_knob.className = 'hue-knob';
+    _this2.__hue_field = document.createElement('div');
+    _this2.__hue_field.className = 'hue-field';
+    _this2.__input = document.createElement('input');
+    _this2.__input.type = 'text';
+    _this2.__input_textShadow = '0 1px 1px ';
+    dom.bind(_this2.__input, 'keydown', function (e) {
+      if (e.keyCode === 13) {
+        onBlur.call(this);
+      }
+    });
+    dom.bind(_this2.__input, 'blur', onBlur);
+    dom.bind(_this2.__selector, 'mousedown', function () {
+      dom.addClass(this, 'drag').bind(window, 'mouseup', function () {
+        dom.removeClass(_this.__selector, 'drag');
+      });
+    });
+    dom.bind(_this2.__selector, 'touchstart', function () {
+      dom.addClass(this, 'drag').bind(window, 'touchend', function () {
+        dom.removeClass(_this.__selector, 'drag');
+      });
+    });
+    var valueField = document.createElement('div');
+    Common.extend(_this2.__selector.style, {
+      width: '122px',
+      height: '102px',
+      padding: '3px',
+      backgroundColor: '#222',
+      boxShadow: '0px 1px 3px rgba(0,0,0,0.3)'
+    });
+    Common.extend(_this2.__field_knob.style, {
+      position: 'absolute',
+      width: '12px',
+      height: '12px',
+      border: _this2.__field_knob_border + (_this2.__color.v < 0.5 ? '#fff' : '#000'),
+      boxShadow: '0px 1px 3px rgba(0,0,0,0.5)',
+      borderRadius: '12px',
+      zIndex: 1
+    });
+    Common.extend(_this2.__hue_knob.style, {
+      position: 'absolute',
+      width: '15px',
+      height: '2px',
+      borderRight: '4px solid #fff',
+      zIndex: 1
+    });
+    Common.extend(_this2.__saturation_field.style, {
+      width: '100px',
+      height: '100px',
+      border: '1px solid #555',
+      marginRight: '3px',
+      display: 'inline-block',
+      cursor: 'pointer'
+    });
+    Common.extend(valueField.style, {
+      width: '100%',
+      height: '100%',
+      background: 'none'
+    });
+    linearGradient(valueField, 'top', 'rgba(0,0,0,0)', '#000');
+    Common.extend(_this2.__hue_field.style, {
+      width: '15px',
+      height: '100px',
+      border: '1px solid #555',
+      cursor: 'ns-resize',
+      position: 'absolute',
+      top: '3px',
+      right: '3px'
+    });
+    hueGradient(_this2.__hue_field);
+    Common.extend(_this2.__input.style, {
+      outline: 'none',
+      textAlign: 'center',
+      color: '#fff',
+      border: 0,
+      fontWeight: 'bold',
+      textShadow: _this2.__input_textShadow + 'rgba(0,0,0,0.7)'
+    });
+    dom.bind(_this2.__saturation_field, 'mousedown', fieldDown);
+    dom.bind(_this2.__saturation_field, 'touchstart', fieldDown);
+    dom.bind(_this2.__field_knob, 'mousedown', fieldDown);
+    dom.bind(_this2.__field_knob, 'touchstart', fieldDown);
+    dom.bind(_this2.__hue_field, 'mousedown', fieldDownH);
+    dom.bind(_this2.__hue_field, 'touchstart', fieldDownH);
+    function fieldDown(e) {
+      setSV(e);
+      dom.bind(window, 'mousemove', setSV);
+      dom.bind(window, 'touchmove', setSV);
+      dom.bind(window, 'mouseup', fieldUpSV);
+      dom.bind(window, 'touchend', fieldUpSV);
+    }
+    function fieldDownH(e) {
+      setH(e);
+      dom.bind(window, 'mousemove', setH);
+      dom.bind(window, 'touchmove', setH);
+      dom.bind(window, 'mouseup', fieldUpH);
+      dom.bind(window, 'touchend', fieldUpH);
+    }
+    function fieldUpSV() {
+      dom.unbind(window, 'mousemove', setSV);
+      dom.unbind(window, 'touchmove', setSV);
+      dom.unbind(window, 'mouseup', fieldUpSV);
+      dom.unbind(window, 'touchend', fieldUpSV);
+      onFinish();
+    }
+    function fieldUpH() {
+      dom.unbind(window, 'mousemove', setH);
+      dom.unbind(window, 'touchmove', setH);
+      dom.unbind(window, 'mouseup', fieldUpH);
+      dom.unbind(window, 'touchend', fieldUpH);
+      onFinish();
+    }
+    function onBlur() {
+      var i = interpret(this.value);
+      if (i !== false) {
+        _this.__color.__state = i;
+        _this.setValue(_this.__color.toOriginal());
+      } else {
+        this.value = _this.__color.toString();
+      }
+    }
+    function onFinish() {
+      if (_this.__onFinishChange) {
+        _this.__onFinishChange.call(_this, _this.__color.toOriginal());
+      }
+    }
+    _this2.__saturation_field.appendChild(valueField);
+    _this2.__selector.appendChild(_this2.__field_knob);
+    _this2.__selector.appendChild(_this2.__saturation_field);
+    _this2.__selector.appendChild(_this2.__hue_field);
+    _this2.__hue_field.appendChild(_this2.__hue_knob);
+    _this2.domElement.appendChild(_this2.__input);
+    _this2.domElement.appendChild(_this2.__selector);
+    _this2.updateDisplay();
+    function setSV(e) {
+      if (e.type.indexOf('touch') === -1) {
+        e.preventDefault();
+      }
+      var fieldRect = _this.__saturation_field.getBoundingClientRect();
+      var _ref = e.touches && e.touches[0] || e,
+          clientX = _ref.clientX,
+          clientY = _ref.clientY;
+      var s = (clientX - fieldRect.left) / (fieldRect.right - fieldRect.left);
+      var v = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+      if (v > 1) {
+        v = 1;
+      } else if (v < 0) {
+        v = 0;
+      }
+      if (s > 1) {
+        s = 1;
+      } else if (s < 0) {
+        s = 0;
+      }
+      _this.__color.v = v;
+      _this.__color.s = s;
+      _this.setValue(_this.__color.toOriginal());
+      return false;
+    }
+    function setH(e) {
+      if (e.type.indexOf('touch') === -1) {
+        e.preventDefault();
+      }
+      var fieldRect = _this.__hue_field.getBoundingClientRect();
+      var _ref2 = e.touches && e.touches[0] || e,
+          clientY = _ref2.clientY;
+      var h = 1 - (clientY - fieldRect.top) / (fieldRect.bottom - fieldRect.top);
+      if (h > 1) {
+        h = 1;
+      } else if (h < 0) {
+        h = 0;
+      }
+      _this.__color.h = h * 360;
+      _this.setValue(_this.__color.toOriginal());
+      return false;
+    }
+    return _this2;
+  }
+  createClass(ColorController, [{
+    key: 'updateDisplay',
+    value: function updateDisplay() {
+      var i = interpret(this.getValue());
+      if (i !== false) {
+        var mismatch = false;
+        Common.each(Color.COMPONENTS, function (component) {
+          if (!Common.isUndefined(i[component]) && !Common.isUndefined(this.__color.__state[component]) && i[component] !== this.__color.__state[component]) {
+            mismatch = true;
+            return {};
+          }
+        }, this);
+        if (mismatch) {
+          Common.extend(this.__color.__state, i);
+        }
+      }
+      Common.extend(this.__temp.__state, this.__color.__state);
+      this.__temp.a = 1;
+      var flip = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
+      var _flip = 255 - flip;
+      Common.extend(this.__field_knob.style, {
+        marginLeft: 100 * this.__color.s - 7 + 'px',
+        marginTop: 100 * (1 - this.__color.v) - 7 + 'px',
+        backgroundColor: this.__temp.toHexString(),
+        border: this.__field_knob_border + 'rgb(' + flip + ',' + flip + ',' + flip + ')'
+      });
+      this.__hue_knob.style.marginTop = (1 - this.__color.h / 360) * 100 + 'px';
+      this.__temp.s = 1;
+      this.__temp.v = 1;
+      linearGradient(this.__saturation_field, 'left', '#fff', this.__temp.toHexString());
+      this.__input.value = this.__color.toString();
+      Common.extend(this.__input.style, {
+        backgroundColor: this.__color.toHexString(),
+        color: 'rgb(' + flip + ',' + flip + ',' + flip + ')',
+        textShadow: this.__input_textShadow + 'rgba(' + _flip + ',' + _flip + ',' + _flip + ',.7)'
+      });
+    }
+  }]);
+  return ColorController;
+}(Controller);
+var vendors = ['-moz-', '-o-', '-webkit-', '-ms-', ''];
+function linearGradient(elem, x, a, b) {
+  elem.style.background = '';
+  Common.each(vendors, function (vendor) {
+    elem.style.cssText += 'background: ' + vendor + 'linear-gradient(' + x + ', ' + a + ' 0%, ' + b + ' 100%); ';
+  });
+}
+function hueGradient(elem) {
+  elem.style.background = '';
+  elem.style.cssText += 'background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);';
+  elem.style.cssText += 'background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+  elem.style.cssText += 'background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);';
+}
+
+var css = {
+  load: function load(url, indoc) {
+    var doc = indoc || document;
+    var link = doc.createElement('link');
+    link.type = 'text/css';
+    link.rel = 'stylesheet';
+    link.href = url;
+    doc.getElementsByTagName('head')[0].appendChild(link);
+  },
+  inject: function inject(cssContent, indoc) {
+    var doc = indoc || document;
+    var injected = document.createElement('style');
+    injected.type = 'text/css';
+    injected.innerHTML = cssContent;
+    var head = doc.getElementsByTagName('head')[0];
+    try {
+      head.appendChild(injected);
+    } catch (e) {
+    }
+  }
+};
+
+var saveDialogContents = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
+
+var ControllerFactory = function ControllerFactory(object, property) {
+  var initialValue = object[property];
+  if (Common.isArray(arguments[2]) || Common.isObject(arguments[2])) {
+    return new OptionController(object, property, arguments[2]);
+  }
+  if (Common.isNumber(initialValue)) {
+    if (Common.isNumber(arguments[2]) && Common.isNumber(arguments[3])) {
+      if (Common.isNumber(arguments[4])) {
+        return new NumberControllerSlider(object, property, arguments[2], arguments[3], arguments[4]);
+      }
+      return new NumberControllerSlider(object, property, arguments[2], arguments[3]);
+    }
+    if (Common.isNumber(arguments[4])) {
+      return new NumberControllerBox(object, property, { min: arguments[2], max: arguments[3], step: arguments[4] });
+    }
+    return new NumberControllerBox(object, property, { min: arguments[2], max: arguments[3] });
+  }
+  if (Common.isString(initialValue)) {
+    return new StringController(object, property);
+  }
+  if (Common.isFunction(initialValue)) {
+    return new FunctionController(object, property, '');
+  }
+  if (Common.isBoolean(initialValue)) {
+    return new BooleanController(object, property);
+  }
+  return null;
+};
+
+function requestAnimationFrame$1(callback) {
+  setTimeout(callback, 1000 / 60);
+}
+var requestAnimationFrame$1$1 = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || requestAnimationFrame$1;
+
+var CenteredDiv = function () {
+  function CenteredDiv() {
+    classCallCheck(this, CenteredDiv);
+    this.backgroundElement = document.createElement('div');
+    Common.extend(this.backgroundElement.style, {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+      top: 0,
+      left: 0,
+      display: 'none',
+      zIndex: '1000',
+      opacity: 0,
+      WebkitTransition: 'opacity 0.2s linear',
+      transition: 'opacity 0.2s linear'
+    });
+    dom.makeFullscreen(this.backgroundElement);
+    this.backgroundElement.style.position = 'fixed';
+    this.domElement = document.createElement('div');
+    Common.extend(this.domElement.style, {
+      position: 'fixed',
+      display: 'none',
+      zIndex: '1001',
+      opacity: 0,
+      WebkitTransition: '-webkit-transform 0.2s ease-out, opacity 0.2s linear',
+      transition: 'transform 0.2s ease-out, opacity 0.2s linear'
+    });
+    document.body.appendChild(this.backgroundElement);
+    document.body.appendChild(this.domElement);
+    var _this = this;
+    dom.bind(this.backgroundElement, 'click', function () {
+      _this.hide();
+    });
+  }
+  createClass(CenteredDiv, [{
+    key: 'show',
+    value: function show() {
+      var _this = this;
+      this.backgroundElement.style.display = 'block';
+      this.domElement.style.display = 'block';
+      this.domElement.style.opacity = 0;
+      this.domElement.style.webkitTransform = 'scale(1.1)';
+      this.layout();
+      Common.defer(function () {
+        _this.backgroundElement.style.opacity = 1;
+        _this.domElement.style.opacity = 1;
+        _this.domElement.style.webkitTransform = 'scale(1)';
+      });
+    }
+  }, {
+    key: 'hide',
+    value: function hide() {
+      var _this = this;
+      var hide = function hide() {
+        _this.domElement.style.display = 'none';
+        _this.backgroundElement.style.display = 'none';
+        dom.unbind(_this.domElement, 'webkitTransitionEnd', hide);
+        dom.unbind(_this.domElement, 'transitionend', hide);
+        dom.unbind(_this.domElement, 'oTransitionEnd', hide);
+      };
+      dom.bind(this.domElement, 'webkitTransitionEnd', hide);
+      dom.bind(this.domElement, 'transitionend', hide);
+      dom.bind(this.domElement, 'oTransitionEnd', hide);
+      this.backgroundElement.style.opacity = 0;
+      this.domElement.style.opacity = 0;
+      this.domElement.style.webkitTransform = 'scale(1.1)';
+    }
+  }, {
+    key: 'layout',
+    value: function layout() {
+      this.domElement.style.left = window.innerWidth / 2 - dom.getWidth(this.domElement) / 2 + 'px';
+      this.domElement.style.top = window.innerHeight / 2 - dom.getHeight(this.domElement) / 2 + 'px';
+    }
+  }]);
+  return CenteredDiv;
+}();
+
+var styleSheet = ___$insertStyle(".dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .cr.function .property-name{width:100%}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}\n");
+
+css.inject(styleSheet);
+var CSS_NAMESPACE = 'dg';
+var HIDE_KEY_CODE = 72;
+var CLOSE_BUTTON_HEIGHT = 20;
+var DEFAULT_DEFAULT_PRESET_NAME = 'Default';
+var SUPPORTS_LOCAL_STORAGE = function () {
+  try {
+    return !!window.localStorage;
+  } catch (e) {
+    return false;
+  }
+}();
+var SAVE_DIALOGUE = void 0;
+var autoPlaceVirgin = true;
+var autoPlaceContainer = void 0;
+var hide = false;
+var hideableGuis = [];
+var GUI = function GUI(pars) {
+  var _this = this;
+  var params = pars || {};
+  this.domElement = document.createElement('div');
+  this.__ul = document.createElement('ul');
+  this.domElement.appendChild(this.__ul);
+  dom.addClass(this.domElement, CSS_NAMESPACE);
+  this.__folders = {};
+  this.__controllers = [];
+  this.__rememberedObjects = [];
+  this.__rememberedObjectIndecesToControllers = [];
+  this.__listening = [];
+  params = Common.defaults(params, {
+    closeOnTop: false,
+    autoPlace: true,
+    width: GUI.DEFAULT_WIDTH
+  });
+  params = Common.defaults(params, {
+    resizable: params.autoPlace,
+    hideable: params.autoPlace
+  });
+  if (!Common.isUndefined(params.load)) {
+    if (params.preset) {
+      params.load.preset = params.preset;
+    }
+  } else {
+    params.load = { preset: DEFAULT_DEFAULT_PRESET_NAME };
+  }
+  if (Common.isUndefined(params.parent) && params.hideable) {
+    hideableGuis.push(this);
+  }
+  params.resizable = Common.isUndefined(params.parent) && params.resizable;
+  if (params.autoPlace && Common.isUndefined(params.scrollable)) {
+    params.scrollable = true;
+  }
+  var useLocalStorage = SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(this, 'isLocal')) === 'true';
+  var saveToLocalStorage = void 0;
+  var titleRow = void 0;
+  Object.defineProperties(this,
+  {
+    parent: {
+      get: function get$$1() {
+        return params.parent;
+      }
+    },
+    scrollable: {
+      get: function get$$1() {
+        return params.scrollable;
+      }
+    },
+    autoPlace: {
+      get: function get$$1() {
+        return params.autoPlace;
+      }
+    },
+    closeOnTop: {
+      get: function get$$1() {
+        return params.closeOnTop;
+      }
+    },
+    preset: {
+      get: function get$$1() {
+        if (_this.parent) {
+          return _this.getRoot().preset;
+        }
+        return params.load.preset;
+      },
+      set: function set$$1(v) {
+        if (_this.parent) {
+          _this.getRoot().preset = v;
+        } else {
+          params.load.preset = v;
+        }
+        setPresetSelectIndex(this);
+        _this.revert();
+      }
+    },
+    width: {
+      get: function get$$1() {
+        return params.width;
+      },
+      set: function set$$1(v) {
+        params.width = v;
+        setWidth(_this, v);
+      }
+    },
+    name: {
+      get: function get$$1() {
+        return params.name;
+      },
+      set: function set$$1(v) {
+        params.name = v;
+        if (titleRow) {
+          titleRow.innerHTML = params.name;
+        }
+      }
+    },
+    closed: {
+      get: function get$$1() {
+        return params.closed;
+      },
+      set: function set$$1(v) {
+        params.closed = v;
+        if (params.closed) {
+          dom.addClass(_this.__ul, GUI.CLASS_CLOSED);
+        } else {
+          dom.removeClass(_this.__ul, GUI.CLASS_CLOSED);
+        }
+        this.onResize();
+        if (_this.__closeButton) {
+          _this.__closeButton.innerHTML = v ? GUI.TEXT_OPEN : GUI.TEXT_CLOSED;
+        }
+      }
+    },
+    load: {
+      get: function get$$1() {
+        return params.load;
+      }
+    },
+    useLocalStorage: {
+      get: function get$$1() {
+        return useLocalStorage;
+      },
+      set: function set$$1(bool) {
+        if (SUPPORTS_LOCAL_STORAGE) {
+          useLocalStorage = bool;
+          if (bool) {
+            dom.bind(window, 'unload', saveToLocalStorage);
+          } else {
+            dom.unbind(window, 'unload', saveToLocalStorage);
+          }
+          localStorage.setItem(getLocalStorageHash(_this, 'isLocal'), bool);
+        }
+      }
+    }
+  });
+  if (Common.isUndefined(params.parent)) {
+    this.closed = params.closed || false;
+    dom.addClass(this.domElement, GUI.CLASS_MAIN);
+    dom.makeSelectable(this.domElement, false);
+    if (SUPPORTS_LOCAL_STORAGE) {
+      if (useLocalStorage) {
+        _this.useLocalStorage = true;
+        var savedGui = localStorage.getItem(getLocalStorageHash(this, 'gui'));
+        if (savedGui) {
+          params.load = JSON.parse(savedGui);
+        }
+      }
+    }
+    this.__closeButton = document.createElement('div');
+    this.__closeButton.innerHTML = GUI.TEXT_CLOSED;
+    dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BUTTON);
+    if (params.closeOnTop) {
+      dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_TOP);
+      this.domElement.insertBefore(this.__closeButton, this.domElement.childNodes[0]);
+    } else {
+      dom.addClass(this.__closeButton, GUI.CLASS_CLOSE_BOTTOM);
+      this.domElement.appendChild(this.__closeButton);
+    }
+    dom.bind(this.__closeButton, 'click', function () {
+      _this.closed = !_this.closed;
+    });
+  } else {
+    if (params.closed === undefined) {
+      params.closed = true;
+    }
+    var titleRowName = document.createTextNode(params.name);
+    dom.addClass(titleRowName, 'controller-name');
+    titleRow = addRow(_this, titleRowName);
+    var onClickTitle = function onClickTitle(e) {
+      e.preventDefault();
+      _this.closed = !_this.closed;
+      return false;
+    };
+    dom.addClass(this.__ul, GUI.CLASS_CLOSED);
+    dom.addClass(titleRow, 'title');
+    dom.bind(titleRow, 'click', onClickTitle);
+    if (!params.closed) {
+      this.closed = false;
+    }
+  }
+  if (params.autoPlace) {
+    if (Common.isUndefined(params.parent)) {
+      if (autoPlaceVirgin) {
+        autoPlaceContainer = document.createElement('div');
+        dom.addClass(autoPlaceContainer, CSS_NAMESPACE);
+        dom.addClass(autoPlaceContainer, GUI.CLASS_AUTO_PLACE_CONTAINER);
+        document.body.appendChild(autoPlaceContainer);
+        autoPlaceVirgin = false;
+      }
+      autoPlaceContainer.appendChild(this.domElement);
+      dom.addClass(this.domElement, GUI.CLASS_AUTO_PLACE);
+    }
+    if (!this.parent) {
+      setWidth(_this, params.width);
+    }
+  }
+  this.__resizeHandler = function () {
+    _this.onResizeDebounced();
+  };
+  dom.bind(window, 'resize', this.__resizeHandler);
+  dom.bind(this.__ul, 'webkitTransitionEnd', this.__resizeHandler);
+  dom.bind(this.__ul, 'transitionend', this.__resizeHandler);
+  dom.bind(this.__ul, 'oTransitionEnd', this.__resizeHandler);
+  this.onResize();
+  if (params.resizable) {
+    addResizeHandle(this);
+  }
+  saveToLocalStorage = function saveToLocalStorage() {
+    if (SUPPORTS_LOCAL_STORAGE && localStorage.getItem(getLocalStorageHash(_this, 'isLocal')) === 'true') {
+      localStorage.setItem(getLocalStorageHash(_this, 'gui'), JSON.stringify(_this.getSaveObject()));
+    }
+  };
+  this.saveToLocalStorageIfPossible = saveToLocalStorage;
+  function resetWidth() {
+    var root = _this.getRoot();
+    root.width += 1;
+    Common.defer(function () {
+      root.width -= 1;
+    });
+  }
+  if (!params.parent) {
+    resetWidth();
+  }
+};
+GUI.toggleHide = function () {
+  hide = !hide;
+  Common.each(hideableGuis, function (gui) {
+    gui.domElement.style.display = hide ? 'none' : '';
+  });
+};
+GUI.CLASS_AUTO_PLACE = 'a';
+GUI.CLASS_AUTO_PLACE_CONTAINER = 'ac';
+GUI.CLASS_MAIN = 'main';
+GUI.CLASS_CONTROLLER_ROW = 'cr';
+GUI.CLASS_TOO_TALL = 'taller-than-window';
+GUI.CLASS_CLOSED = 'closed';
+GUI.CLASS_CLOSE_BUTTON = 'close-button';
+GUI.CLASS_CLOSE_TOP = 'close-top';
+GUI.CLASS_CLOSE_BOTTOM = 'close-bottom';
+GUI.CLASS_DRAG = 'drag';
+GUI.DEFAULT_WIDTH = 245;
+GUI.TEXT_CLOSED = 'Close Controls';
+GUI.TEXT_OPEN = 'Open Controls';
+GUI._keydownHandler = function (e) {
+  if (document.activeElement.type !== 'text' && (e.which === HIDE_KEY_CODE || e.keyCode === HIDE_KEY_CODE)) {
+    GUI.toggleHide();
+  }
+};
+dom.bind(window, 'keydown', GUI._keydownHandler, false);
+Common.extend(GUI.prototype,
+{
+  add: function add(object, property) {
+    return _add(this, object, property, {
+      factoryArgs: Array.prototype.slice.call(arguments, 2)
+    });
+  },
+  addColor: function addColor(object, property) {
+    return _add(this, object, property, {
+      color: true
+    });
+  },
+  remove: function remove(controller) {
+    this.__ul.removeChild(controller.__li);
+    this.__controllers.splice(this.__controllers.indexOf(controller), 1);
+    var _this = this;
+    Common.defer(function () {
+      _this.onResize();
+    });
+  },
+  destroy: function destroy() {
+    if (this.parent) {
+      throw new Error('Only the root GUI should be removed with .destroy(). ' + 'For subfolders, use gui.removeFolder(folder) instead.');
+    }
+    if (this.autoPlace) {
+      autoPlaceContainer.removeChild(this.domElement);
+    }
+    var _this = this;
+    Common.each(this.__folders, function (subfolder) {
+      _this.removeFolder(subfolder);
+    });
+    dom.unbind(window, 'keydown', GUI._keydownHandler, false);
+    removeListeners(this);
+  },
+  addFolder: function addFolder(name) {
+    if (this.__folders[name] !== undefined) {
+      throw new Error('You already have a folder in this GUI by the' + ' name "' + name + '"');
+    }
+    var newGuiParams = { name: name, parent: this };
+    newGuiParams.autoPlace = this.autoPlace;
+    if (this.load &&
+    this.load.folders &&
+    this.load.folders[name]) {
+      newGuiParams.closed = this.load.folders[name].closed;
+      newGuiParams.load = this.load.folders[name];
+    }
+    var gui = new GUI(newGuiParams);
+    this.__folders[name] = gui;
+    var li = addRow(this, gui.domElement);
+    dom.addClass(li, 'folder');
+    return gui;
+  },
+  removeFolder: function removeFolder(folder) {
+    this.__ul.removeChild(folder.domElement.parentElement);
+    delete this.__folders[folder.name];
+    if (this.load &&
+    this.load.folders &&
+    this.load.folders[folder.name]) {
+      delete this.load.folders[folder.name];
+    }
+    removeListeners(folder);
+    var _this = this;
+    Common.each(folder.__folders, function (subfolder) {
+      folder.removeFolder(subfolder);
+    });
+    Common.defer(function () {
+      _this.onResize();
+    });
+  },
+  open: function open() {
+    this.closed = false;
+  },
+  close: function close() {
+    this.closed = true;
+  },
+  hide: function hide() {
+    this.domElement.style.display = 'none';
+  },
+  show: function show() {
+    this.domElement.style.display = '';
+  },
+  onResize: function onResize() {
+    var root = this.getRoot();
+    if (root.scrollable) {
+      var top = dom.getOffset(root.__ul).top;
+      var h = 0;
+      Common.each(root.__ul.childNodes, function (node) {
+        if (!(root.autoPlace && node === root.__save_row)) {
+          h += dom.getHeight(node);
+        }
+      });
+      if (window.innerHeight - top - CLOSE_BUTTON_HEIGHT < h) {
+        dom.addClass(root.domElement, GUI.CLASS_TOO_TALL);
+        root.__ul.style.height = window.innerHeight - top - CLOSE_BUTTON_HEIGHT + 'px';
+      } else {
+        dom.removeClass(root.domElement, GUI.CLASS_TOO_TALL);
+        root.__ul.style.height = 'auto';
+      }
+    }
+    if (root.__resize_handle) {
+      Common.defer(function () {
+        root.__resize_handle.style.height = root.__ul.offsetHeight + 'px';
+      });
+    }
+    if (root.__closeButton) {
+      root.__closeButton.style.width = root.width + 'px';
+    }
+  },
+  onResizeDebounced: Common.debounce(function () {
+    this.onResize();
+  }, 50),
+  remember: function remember() {
+    if (Common.isUndefined(SAVE_DIALOGUE)) {
+      SAVE_DIALOGUE = new CenteredDiv();
+      SAVE_DIALOGUE.domElement.innerHTML = saveDialogContents;
+    }
+    if (this.parent) {
+      throw new Error('You can only call remember on a top level GUI.');
+    }
+    var _this = this;
+    Common.each(Array.prototype.slice.call(arguments), function (object) {
+      if (_this.__rememberedObjects.length === 0) {
+        addSaveMenu(_this);
+      }
+      if (_this.__rememberedObjects.indexOf(object) === -1) {
+        _this.__rememberedObjects.push(object);
+      }
+    });
+    if (this.autoPlace) {
+      setWidth(this, this.width);
+    }
+  },
+  getRoot: function getRoot() {
+    var gui = this;
+    while (gui.parent) {
+      gui = gui.parent;
+    }
+    return gui;
+  },
+  getSaveObject: function getSaveObject() {
+    var toReturn = this.load;
+    toReturn.closed = this.closed;
+    if (this.__rememberedObjects.length > 0) {
+      toReturn.preset = this.preset;
+      if (!toReturn.remembered) {
+        toReturn.remembered = {};
+      }
+      toReturn.remembered[this.preset] = getCurrentPreset(this);
+    }
+    toReturn.folders = {};
+    Common.each(this.__folders, function (element, key) {
+      toReturn.folders[key] = element.getSaveObject();
+    });
+    return toReturn;
+  },
+  save: function save() {
+    if (!this.load.remembered) {
+      this.load.remembered = {};
+    }
+    this.load.remembered[this.preset] = getCurrentPreset(this);
+    markPresetModified(this, false);
+    this.saveToLocalStorageIfPossible();
+  },
+  saveAs: function saveAs(presetName) {
+    if (!this.load.remembered) {
+      this.load.remembered = {};
+      this.load.remembered[DEFAULT_DEFAULT_PRESET_NAME] = getCurrentPreset(this, true);
+    }
+    this.load.remembered[presetName] = getCurrentPreset(this);
+    this.preset = presetName;
+    addPresetOption(this, presetName, true);
+    this.saveToLocalStorageIfPossible();
+  },
+  revert: function revert(gui) {
+    Common.each(this.__controllers, function (controller) {
+      if (!this.getRoot().load.remembered) {
+        controller.setValue(controller.initialValue);
+      } else {
+        recallSavedValue(gui || this.getRoot(), controller);
+      }
+      if (controller.__onFinishChange) {
+        controller.__onFinishChange.call(controller, controller.getValue());
+      }
+    }, this);
+    Common.each(this.__folders, function (folder) {
+      folder.revert(folder);
+    });
+    if (!gui) {
+      markPresetModified(this.getRoot(), false);
+    }
+  },
+  listen: function listen(controller) {
+    var init = this.__listening.length === 0;
+    this.__listening.push(controller);
+    if (init) {
+      updateDisplays(this.__listening);
+    }
+  },
+  updateDisplay: function updateDisplay() {
+    Common.each(this.__controllers, function (controller) {
+      controller.updateDisplay();
+    });
+    Common.each(this.__folders, function (folder) {
+      folder.updateDisplay();
+    });
+  }
+});
+function addRow(gui, newDom, liBefore) {
+  var li = document.createElement('li');
+  if (newDom) {
+    li.appendChild(newDom);
+  }
+  if (liBefore) {
+    gui.__ul.insertBefore(li, liBefore);
+  } else {
+    gui.__ul.appendChild(li);
+  }
+  gui.onResize();
+  return li;
+}
+function removeListeners(gui) {
+  dom.unbind(window, 'resize', gui.__resizeHandler);
+  if (gui.saveToLocalStorageIfPossible) {
+    dom.unbind(window, 'unload', gui.saveToLocalStorageIfPossible);
+  }
+}
+function markPresetModified(gui, modified) {
+  var opt = gui.__preset_select[gui.__preset_select.selectedIndex];
+  if (modified) {
+    opt.innerHTML = opt.value + '*';
+  } else {
+    opt.innerHTML = opt.value;
+  }
+}
+function augmentController(gui, li, controller) {
+  controller.__li = li;
+  controller.__gui = gui;
+  Common.extend(controller, {
+    options: function options(_options) {
+      if (arguments.length > 1) {
+        var nextSibling = controller.__li.nextElementSibling;
+        controller.remove();
+        return _add(gui, controller.object, controller.property, {
+          before: nextSibling,
+          factoryArgs: [Common.toArray(arguments)]
+        });
+      }
+      if (Common.isArray(_options) || Common.isObject(_options)) {
+        var _nextSibling = controller.__li.nextElementSibling;
+        controller.remove();
+        return _add(gui, controller.object, controller.property, {
+          before: _nextSibling,
+          factoryArgs: [_options]
+        });
+      }
+    },
+    name: function name(_name) {
+      controller.__li.firstElementChild.firstElementChild.innerHTML = _name;
+      return controller;
+    },
+    listen: function listen() {
+      controller.__gui.listen(controller);
+      return controller;
+    },
+    remove: function remove() {
+      controller.__gui.remove(controller);
+      return controller;
+    }
+  });
+  if (controller instanceof NumberControllerSlider) {
+    var box = new NumberControllerBox(controller.object, controller.property, { min: controller.__min, max: controller.__max, step: controller.__step });
+    Common.each(['updateDisplay', 'onChange', 'onFinishChange', 'step', 'min', 'max'], function (method) {
+      var pc = controller[method];
+      var pb = box[method];
+      controller[method] = box[method] = function () {
+        var args = Array.prototype.slice.call(arguments);
+        pb.apply(box, args);
+        return pc.apply(controller, args);
+      };
+    });
+    dom.addClass(li, 'has-slider');
+    controller.domElement.insertBefore(box.domElement, controller.domElement.firstElementChild);
+  } else if (controller instanceof NumberControllerBox) {
+    var r = function r(returned) {
+      if (Common.isNumber(controller.__min) && Common.isNumber(controller.__max)) {
+        var oldName = controller.__li.firstElementChild.firstElementChild.innerHTML;
+        var wasListening = controller.__gui.__listening.indexOf(controller) > -1;
+        controller.remove();
+        var newController = _add(gui, controller.object, controller.property, {
+          before: controller.__li.nextElementSibling,
+          factoryArgs: [controller.__min, controller.__max, controller.__step]
+        });
+        newController.name(oldName);
+        if (wasListening) newController.listen();
+        return newController;
+      }
+      return returned;
+    };
+    controller.min = Common.compose(r, controller.min);
+    controller.max = Common.compose(r, controller.max);
+  } else if (controller instanceof BooleanController) {
+    dom.bind(li, 'click', function () {
+      dom.fakeEvent(controller.__checkbox, 'click');
+    });
+    dom.bind(controller.__checkbox, 'click', function (e) {
+      e.stopPropagation();
+    });
+  } else if (controller instanceof FunctionController) {
+    dom.bind(li, 'click', function () {
+      dom.fakeEvent(controller.__button, 'click');
+    });
+    dom.bind(li, 'mouseover', function () {
+      dom.addClass(controller.__button, 'hover');
+    });
+    dom.bind(li, 'mouseout', function () {
+      dom.removeClass(controller.__button, 'hover');
+    });
+  } else if (controller instanceof ColorController) {
+    dom.addClass(li, 'color');
+    controller.updateDisplay = Common.compose(function (val) {
+      li.style.borderLeftColor = controller.__color.toString();
+      return val;
+    }, controller.updateDisplay);
+    controller.updateDisplay();
+  }
+  controller.setValue = Common.compose(function (val) {
+    if (gui.getRoot().__preset_select && controller.isModified()) {
+      markPresetModified(gui.getRoot(), true);
+    }
+    return val;
+  }, controller.setValue);
+}
+function recallSavedValue(gui, controller) {
+  var root = gui.getRoot();
+  var matchedIndex = root.__rememberedObjects.indexOf(controller.object);
+  if (matchedIndex !== -1) {
+    var controllerMap = root.__rememberedObjectIndecesToControllers[matchedIndex];
+    if (controllerMap === undefined) {
+      controllerMap = {};
+      root.__rememberedObjectIndecesToControllers[matchedIndex] = controllerMap;
+    }
+    controllerMap[controller.property] = controller;
+    if (root.load && root.load.remembered) {
+      var presetMap = root.load.remembered;
+      var preset = void 0;
+      if (presetMap[gui.preset]) {
+        preset = presetMap[gui.preset];
+      } else if (presetMap[DEFAULT_DEFAULT_PRESET_NAME]) {
+        preset = presetMap[DEFAULT_DEFAULT_PRESET_NAME];
+      } else {
+        return;
+      }
+      if (preset[matchedIndex] && preset[matchedIndex][controller.property] !== undefined) {
+        var value = preset[matchedIndex][controller.property];
+        controller.initialValue = value;
+        controller.setValue(value);
+      }
+    }
+  }
+}
+function _add(gui, object, property, params) {
+  if (object[property] === undefined) {
+    throw new Error('Object "' + object + '" has no property "' + property + '"');
+  }
+  var controller = void 0;
+  if (params.color) {
+    controller = new ColorController(object, property);
+  } else {
+    var factoryArgs = [object, property].concat(params.factoryArgs);
+    controller = ControllerFactory.apply(gui, factoryArgs);
+  }
+  if (params.before instanceof Controller) {
+    params.before = params.before.__li;
+  }
+  recallSavedValue(gui, controller);
+  dom.addClass(controller.domElement, 'c');
+  var name = document.createElement('span');
+  dom.addClass(name, 'property-name');
+  name.innerHTML = controller.property;
+  var container = document.createElement('div');
+  container.appendChild(name);
+  container.appendChild(controller.domElement);
+  var li = addRow(gui, container, params.before);
+  dom.addClass(li, GUI.CLASS_CONTROLLER_ROW);
+  if (controller instanceof ColorController) {
+    dom.addClass(li, 'color');
+  } else {
+    dom.addClass(li, _typeof(controller.getValue()));
+  }
+  augmentController(gui, li, controller);
+  gui.__controllers.push(controller);
+  return controller;
+}
+function getLocalStorageHash(gui, key) {
+  return document.location.href + '.' + key;
+}
+function addPresetOption(gui, name, setSelected) {
+  var opt = document.createElement('option');
+  opt.innerHTML = name;
+  opt.value = name;
+  gui.__preset_select.appendChild(opt);
+  if (setSelected) {
+    gui.__preset_select.selectedIndex = gui.__preset_select.length - 1;
+  }
+}
+function showHideExplain(gui, explain) {
+  explain.style.display = gui.useLocalStorage ? 'block' : 'none';
+}
+function addSaveMenu(gui) {
+  var div = gui.__save_row = document.createElement('li');
+  dom.addClass(gui.domElement, 'has-save');
+  gui.__ul.insertBefore(div, gui.__ul.firstChild);
+  dom.addClass(div, 'save-row');
+  var gears = document.createElement('span');
+  gears.innerHTML = '&nbsp;';
+  dom.addClass(gears, 'button gears');
+  var button = document.createElement('span');
+  button.innerHTML = 'Save';
+  dom.addClass(button, 'button');
+  dom.addClass(button, 'save');
+  var button2 = document.createElement('span');
+  button2.innerHTML = 'New';
+  dom.addClass(button2, 'button');
+  dom.addClass(button2, 'save-as');
+  var button3 = document.createElement('span');
+  button3.innerHTML = 'Revert';
+  dom.addClass(button3, 'button');
+  dom.addClass(button3, 'revert');
+  var select = gui.__preset_select = document.createElement('select');
+  if (gui.load && gui.load.remembered) {
+    Common.each(gui.load.remembered, function (value, key) {
+      addPresetOption(gui, key, key === gui.preset);
+    });
+  } else {
+    addPresetOption(gui, DEFAULT_DEFAULT_PRESET_NAME, false);
+  }
+  dom.bind(select, 'change', function () {
+    for (var index = 0; index < gui.__preset_select.length; index++) {
+      gui.__preset_select[index].innerHTML = gui.__preset_select[index].value;
+    }
+    gui.preset = this.value;
+  });
+  div.appendChild(select);
+  div.appendChild(gears);
+  div.appendChild(button);
+  div.appendChild(button2);
+  div.appendChild(button3);
+  if (SUPPORTS_LOCAL_STORAGE) {
+    var explain = document.getElementById('dg-local-explain');
+    var localStorageCheckBox = document.getElementById('dg-local-storage');
+    var saveLocally = document.getElementById('dg-save-locally');
+    saveLocally.style.display = 'block';
+    if (localStorage.getItem(getLocalStorageHash(gui, 'isLocal')) === 'true') {
+      localStorageCheckBox.setAttribute('checked', 'checked');
+    }
+    showHideExplain(gui, explain);
+    dom.bind(localStorageCheckBox, 'change', function () {
+      gui.useLocalStorage = !gui.useLocalStorage;
+      showHideExplain(gui, explain);
+    });
+  }
+  var newConstructorTextArea = document.getElementById('dg-new-constructor');
+  dom.bind(newConstructorTextArea, 'keydown', function (e) {
+    if (e.metaKey && (e.which === 67 || e.keyCode === 67)) {
+      SAVE_DIALOGUE.hide();
+    }
+  });
+  dom.bind(gears, 'click', function () {
+    newConstructorTextArea.innerHTML = JSON.stringify(gui.getSaveObject(), undefined, 2);
+    SAVE_DIALOGUE.show();
+    newConstructorTextArea.focus();
+    newConstructorTextArea.select();
+  });
+  dom.bind(button, 'click', function () {
+    gui.save();
+  });
+  dom.bind(button2, 'click', function () {
+    var presetName = prompt('Enter a new preset name.');
+    if (presetName) {
+      gui.saveAs(presetName);
+    }
+  });
+  dom.bind(button3, 'click', function () {
+    gui.revert();
+  });
+}
+function addResizeHandle(gui) {
+  var pmouseX = void 0;
+  gui.__resize_handle = document.createElement('div');
+  Common.extend(gui.__resize_handle.style, {
+    width: '6px',
+    marginLeft: '-3px',
+    height: '200px',
+    cursor: 'ew-resize',
+    position: 'absolute'
+  });
+  function drag(e) {
+    e.preventDefault();
+    gui.width += pmouseX - e.clientX;
+    gui.onResize();
+    pmouseX = e.clientX;
+    return false;
+  }
+  function dragStop() {
+    dom.removeClass(gui.__closeButton, GUI.CLASS_DRAG);
+    dom.unbind(window, 'mousemove', drag);
+    dom.unbind(window, 'mouseup', dragStop);
+  }
+  function dragStart(e) {
+    e.preventDefault();
+    pmouseX = e.clientX;
+    dom.addClass(gui.__closeButton, GUI.CLASS_DRAG);
+    dom.bind(window, 'mousemove', drag);
+    dom.bind(window, 'mouseup', dragStop);
+    return false;
+  }
+  dom.bind(gui.__resize_handle, 'mousedown', dragStart);
+  dom.bind(gui.__closeButton, 'mousedown', dragStart);
+  gui.domElement.insertBefore(gui.__resize_handle, gui.domElement.firstElementChild);
+}
+function setWidth(gui, w) {
+  gui.domElement.style.width = w + 'px';
+  if (gui.__save_row && gui.autoPlace) {
+    gui.__save_row.style.width = w + 'px';
+  }
+  if (gui.__closeButton) {
+    gui.__closeButton.style.width = w + 'px';
+  }
+}
+function getCurrentPreset(gui, useInitialValues) {
+  var toReturn = {};
+  Common.each(gui.__rememberedObjects, function (val, index) {
+    var savedValues = {};
+    var controllerMap = gui.__rememberedObjectIndecesToControllers[index];
+    Common.each(controllerMap, function (controller, property) {
+      savedValues[property] = useInitialValues ? controller.initialValue : controller.getValue();
+    });
+    toReturn[index] = savedValues;
+  });
+  return toReturn;
+}
+function setPresetSelectIndex(gui) {
+  for (var index = 0; index < gui.__preset_select.length; index++) {
+    if (gui.__preset_select[index].value === gui.preset) {
+      gui.__preset_select.selectedIndex = index;
+    }
+  }
+}
+function updateDisplays(controllerArray) {
+  if (controllerArray.length !== 0) {
+    requestAnimationFrame$1$1.call(window, function () {
+      updateDisplays(controllerArray);
+    });
+  }
+  Common.each(controllerArray, function (c) {
+    c.updateDisplay();
+  });
+}
+var GUI$1 = GUI;
+
 class Game {
   static canvas;
   static renderer;
@@ -31134,12 +33680,18 @@ class Game {
   static mouseDown = false;
   static mouseDrag = false;
   static keys = {};
-  scene = void 0;
-  debugPhysics = true;
-  stepPhysics = false;
+  static scene = void 0;
+  static debugOverlay = true;
+  static stepPhysics = false;
   dt = 0;
   time = 0;
   prevTime = 0;
+  static _gui = new GUI$1();
+  static gui = {
+    "physics": this._gui.addFolder("Physics"),
+    "solver": this._gui.addFolder("Solver"),
+    "debug": this._gui.addFolder("Debugging")
+  };
   constructor(canvasID) {
     Game.canvas = document.getElementById(canvasID);
     Game.renderer = new WebGLRenderer({
@@ -31155,8 +33707,8 @@ class Game {
     window.addEventListener("keydown", (e) => {
       Game.keys[e.code] = true;
       if (e.code == "Space") {
-        this.stepPhysics = true;
-        this.scene?.updatePhysics(this.dt);
+        Game.stepPhysics = true;
+        Game.scene?.updatePhysics(this.dt);
       }
     });
     window.addEventListener("keyup", (e) => {
@@ -31165,6 +33717,8 @@ class Game {
     window.addEventListener("mousedown", this.onMouse.bind(this));
     window.addEventListener("mousemove", this.onMouse.bind(this));
     window.addEventListener("mouseup", this.onMouse.bind(this));
+    Game.gui.physics.add(Game, "stepPhysics").name("Step physics");
+    Game.gui.debug.add(Game, "debugOverlay").name("Enable overlay");
   }
   setupRenderPass() {
     return;
@@ -31175,12 +33729,12 @@ class Game {
     const height = canvas.clientHeight;
     Game.renderer.setSize(width, height, false);
     Game.composer.setSize(width, height);
-    if (this.scene)
-      this.scene.onResize(width, height);
+    if (Game.scene)
+      Game.scene.onResize(width, height);
   }
   add(scene) {
-    this.scene = scene;
-    this.scene.init();
+    Game.scene = scene;
+    Game.scene.init();
     this.fitContent();
     this.setupRenderPass();
   }
@@ -31188,12 +33742,12 @@ class Game {
     this.prevTime = this.time;
     this.time = time;
     this.dt = (this.time - this.prevTime) / 1e3;
-    if (this.scene) {
-      this.scene.updatePhysics(this.dt, !this.stepPhysics);
-      this.scene.update(time, this.dt, Game.keys);
-      Game.renderer.render(this.scene.scene, this.scene.camera);
-      if (this.debugPhysics)
-        this.scene.world.draw(Game.renderer, this.scene.camera);
+    if (Game.scene) {
+      Game.scene.updatePhysics(this.dt, !Game.stepPhysics);
+      Game.scene.update(time, this.dt, Game.keys);
+      Game.renderer.render(Game.scene.scene, Game.scene.camera);
+      if (Game.debugOverlay)
+        Game.scene.world.draw(Game.renderer, Game.scene.camera);
     }
   }
   onMouse(e) {
@@ -31212,11 +33766,12 @@ class Game {
     }
   }
   performRaycast(type) {
-    const scene = this.scene;
+    const scene = Game.scene;
     if (!scene)
       return;
     Game.raycaster.setFromCamera(Game.pointer, scene.camera);
     const hits = Game.raycaster.intersectObjects(scene.scene.children);
+    Game.raycaster;
     const item = hits[0];
     Game.events.emit(new RayCastEvent({
       type,
@@ -32563,12 +35118,24 @@ class ContactSet {
   // Current constraint force
   Fn = 0;
   // Current constraint force (normal direction) == -contact.lambda_n / (h * h);
-  constructor(A, B, normal) {
+  constructor(A, B, normal, p1, p2, r1, r2) {
     if (A === B || A.id == B.id)
       throw new Error("Cannot create a ContactSet with the same body");
     this.A = A;
     this.B = B;
+    this.p1 = p1;
+    this.p2 = p2;
+    this.r1 = r1 ?? this.A.worldToLocal(p1);
+    this.r2 = r2 ?? this.B.worldToLocal(p2);
     this.n = normal.clone();
+    this.vrel = Vec3.sub(
+      this.A.getVelocityAt(this.p1),
+      this.B.getVelocityAt(this.p2)
+    );
+    this.vn = this.vrel.dot(this.n);
+    this.e = 0.5 * (A.bounciness + B.bounciness);
+    this.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
+    this.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
   }
   update() {
     const A = this.A;
@@ -32577,15 +35144,6 @@ class ContactSet {
     const p2 = B.pose.p.clone().add(this.r2.clone().applyQuaternion(B.pose.q));
     this.p1 = p1;
     this.p2 = p2;
-  }
-}
-
-class CoordinateSystem {
-  static localToWorld(localVector, rotation, translation) {
-    return new Vec3().copy(localVector).applyQuaternion(rotation).add(translation);
-  }
-  static worldToLocal(worldVector, rotation, translation) {
-    return new Vec3().copy(worldVector).sub(translation).applyQuaternion(rotation.clone().conjugate());
   }
 }
 
@@ -32598,15 +35156,18 @@ var ColliderType = /* @__PURE__ */ ((ColliderType2) => {
 })(ColliderType || {});
 class Collider {
   colliderType = 2 /* Sphere */;
-  // polygons: Array<any> = []; // Array<Polygon>;
   vertices = [];
-  // Array<Vertex>;
-  // indices: Uint16Array = new Uint16Array();
-  // uniqueIndices: Uint16Array = new Uint16Array();
+  verticesWorldSpace = [];
   indices = [];
   uniqueIndices = [];
-  relativePos = new Vec3(0, 0, 0);
-  updateRotation(q) {
+  // relativePos: Vec3 = new Vec3(0.0, 0.0, 0.0);
+  aabb = new Box3();
+  aabbHelper = new Box3Helper(this.aabb);
+  updateGlobalPose(pose) {
+  }
+  /* GJK */
+  findFurthestPoint(dir) {
+    return new Vec3();
   }
 }
 class PlaneCollider extends Collider {
@@ -32626,8 +35187,7 @@ class PlaneCollider extends Collider {
       this.plane = new Plane(normal);
     }
   }
-  updateRotation(q) {
-    this.normalRef.applyQuaternion(q);
+  updateGlobalPose(pose) {
   }
 }
 class MeshCollider extends Collider {
@@ -32641,16 +35201,67 @@ class MeshCollider extends Collider {
     }
     if (whichOne == "box") {
       this.vertices = [
-        new Vec3(-width / 2, height / 2, depth / 2),
-        new Vec3(-width / 2, -height / 2, depth / 2),
-        new Vec3(width / 2, height / 2, depth / 2),
-        new Vec3(width / 2, -height / 2, depth / 2),
-        new Vec3(width / 2, height / 2, -depth / 2),
+        new Vec3(-width / 2, -height / 2, -depth / 2),
+        // bottom left back corner
         new Vec3(width / 2, -height / 2, -depth / 2),
+        // bottom right back corner
+        new Vec3(width / 2, height / 2, -depth / 2),
+        // top right back corner
         new Vec3(-width / 2, height / 2, -depth / 2),
-        new Vec3(-width / 2, -height / 2, -depth / 2)
+        // top left back corner
+        new Vec3(-width / 2, -height / 2, depth / 2),
+        // bottom left front corner
+        new Vec3(width / 2, -height / 2, depth / 2),
+        // bottom right front corner
+        new Vec3(width / 2, height / 2, depth / 2),
+        // top right front corner
+        new Vec3(-width / 2, height / 2, depth / 2)
+        // top left front corner
       ];
-      this.indices = [0, 1, 2, 3, 4, 5, 6, 7];
+      this.indices = [
+        0,
+        1,
+        2,
+        // back face
+        2,
+        3,
+        0,
+        1,
+        5,
+        6,
+        // right face
+        6,
+        2,
+        1,
+        5,
+        4,
+        7,
+        // front face
+        7,
+        6,
+        5,
+        4,
+        0,
+        3,
+        // left face
+        3,
+        7,
+        4,
+        3,
+        2,
+        6,
+        // top face
+        6,
+        7,
+        3,
+        0,
+        4,
+        5,
+        // bottom face
+        5,
+        1,
+        0
+      ];
       this.uniqueIndices = [0, 1, 2, 3, 4, 5, 6, 7];
     }
     if (whichOne == "tetra") {
@@ -32680,42 +35291,73 @@ class MeshCollider extends Collider {
         0
       ];
     }
+    for (let i = 0; i < this.vertices.length; i++) {
+      this.verticesWorldSpace[i] = this.vertices[i].clone();
+    }
     return this;
+  }
+  updateGlobalPose(pose) {
+    const min = new Vec3(Infinity, Infinity, Infinity);
+    const max = new Vec3(-Infinity, -Infinity, -Infinity);
+    for (let i = 0; i < this.vertices.length; i++) {
+      const v = this.vertices[i];
+      this.verticesWorldSpace[i].copy(v).applyQuaternion(pose.q).add(pose.p);
+      min.min(this.verticesWorldSpace[i]);
+      max.max(this.verticesWorldSpace[i]);
+    }
+    this.aabb.set(min, max);
+  }
+  /* GJK */
+  findFurthestPoint(dir) {
+    const maxPoint = new Vec3();
+    let maxDist = -Infinity;
+    for (const vertex of this.verticesWorldSpace) {
+      const distance = vertex.dot(dir);
+      if (distance > maxDist) {
+        maxDist = distance;
+        maxPoint.copy(vertex);
+      }
+    }
+    return maxPoint;
   }
 }
 
 class BaseSolver {
-  debug = false;
+  debugContacts = false;
   // @TODO move helpers to World
   helpers = {
-    _debug: new ArrowHelper(),
     n: new ArrowHelper(),
     d: new ArrowHelper(),
     r1: new ArrowHelper(),
     r2: new ArrowHelper(),
-    A: new Box3Helper(new Box3(), new Color(13421772)),
-    B: new Box3Helper(new Box3(), new Color(13421772)),
-    p1: new Box3Helper(new Box3(), new Color(16776960)),
-    p2: new Box3Helper(new Box3(), new Color(16711935))
+    A: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
+    B: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
+    p1: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16776960)),
+    p2: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16711935))
   };
+  static ddIdx = 0;
   constructor() {
-    if (this.debug) {
-      World.scene.add(new AxesHelper(1));
-      for (const h in this.helpers) {
-        World.scene.add(this.helpers[h]);
-      }
-      this.helpers._debug.setColor(65280);
-      this.helpers.n.setColor(65535);
-      this.helpers.d.setColor(16711680);
-      this.helpers.r2.setColor(16711935);
+    Game.gui.debug.add(this, "debugContacts").name("Debug contacts");
+    for (const h in this.helpers) {
+      World.scene.add(this.helpers[h]);
     }
+    this.helpers.n.setColor(65535);
+    this.helpers.d.setColor(16711680);
+    this.helpers.r2.setColor(16711935);
   }
   dd(vec, pos) {
-    this.setDebugVector("_debug", vec, pos);
+    this.setDebugVector("_debug" + BaseSolver.ddIdx, vec, pos);
+    BaseSolver.ddIdx++;
   }
-  setDebugVector(key, vec, pos) {
-    if (!this.debug)
+  setDebugVector(key, vec, pos = new Vec3(0, 0, 0)) {
+    if (!Game.debugOverlay)
       return;
+    if (!this.helpers[key]) {
+      const arrow2 = new ArrowHelper();
+      arrow2.setColor(new Color$1().setHex(Math.random() * 16777215));
+      this.helpers[key] = arrow2;
+      World.scene.add(arrow2);
+    }
     const arrow = this.helpers[key];
     if (pos)
       arrow.position.copy(pos);
@@ -32723,13 +35365,13 @@ class BaseSolver {
     arrow.setLength(vec.length());
   }
   setDebugPoint(key, pos, size = 0.1) {
-    if (!this.debug)
+    if (!Game.debugOverlay)
       return;
     const box = this.helpers[key];
     box.box = new Box3().setFromCenterAndSize(pos, new Vec3(size, size, size));
   }
   debugContact(contact) {
-    if (!this.debug)
+    if (!Game.debugOverlay || !this.debugContacts)
       return;
     for (const key in contact) {
       this.setDebugPoint("A", contact.A.pose.p, 0.02);
@@ -32739,9 +35381,9 @@ class BaseSolver {
       if (key == "d")
         this.setDebugVector(key, contact.n.clone().multiplyScalar(contact.d), contact.p1);
       if (key == "r1")
-        this.setDebugVector(key, CoordinateSystem.localToWorld(contact.r1, contact.A.pose.q, contact.A.pose.p).sub(contact.A.pose.p), contact.A.pose.p);
+        this.setDebugVector(key, contact.A.localToWorld(contact.r1).sub(contact.A.pose.p), contact.A.pose.p);
       if (key == "r2")
-        this.setDebugVector(key, CoordinateSystem.localToWorld(contact.r2, contact.B.pose.q, contact.B.pose.p).sub(contact.B.pose.p), contact.B.pose.p);
+        this.setDebugVector(key, contact.B.localToWorld(contact.r2).sub(contact.B.pose.p), contact.B.pose.p);
       if (key == "p1")
         this.setDebugPoint(key, contact.p1);
       if (key == "p2")
@@ -32751,9 +35393,1692 @@ class BaseSolver {
   // public update(bodies: Array<RigidBody>, constraints: Array<Constraint>, dt: number, gravity: Vec3): void {}
 }
 
+/**
+ * Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
+ */
+
+const Visible = 0;
+const Deleted = 1;
+
+const _v1 = new Vector3();
+const _line3 = new Line3();
+const _plane = new Plane();
+const _closestPoint = new Vector3();
+const _triangle = new Triangle();
+
+class ConvexHull {
+
+	constructor() {
+
+		this.tolerance = - 1;
+
+		this.faces = []; // the generated faces of the convex hull
+		this.newFaces = []; // this array holds the faces that are generated within a single iteration
+
+		// the vertex lists work as follows:
+		//
+		// let 'a' and 'b' be 'Face' instances
+		// let 'v' be points wrapped as instance of 'Vertex'
+		//
+		//     [v, v, ..., v, v, v, ...]
+		//      ^             ^
+		//      |             |
+		//  a.outside     b.outside
+		//
+		this.assigned = new VertexList();
+		this.unassigned = new VertexList();
+
+		this.vertices = []; 	// vertices of the hull (internal representation of given geometry data)
+
+	}
+
+	setFromPoints( points ) {
+
+		// The algorithm needs at least four points.
+
+		if ( points.length >= 4 ) {
+
+			this.makeEmpty();
+
+			for ( let i = 0, l = points.length; i < l; i ++ ) {
+
+				this.vertices.push( new VertexNode( points[ i ] ) );
+
+			}
+
+			this.compute();
+
+		}
+
+		return this;
+
+	}
+
+	setFromObject( object ) {
+
+		const points = [];
+
+		object.updateMatrixWorld( true );
+
+		object.traverse( function ( node ) {
+
+			const geometry = node.geometry;
+
+			if ( geometry !== undefined ) {
+
+				const attribute = geometry.attributes.position;
+
+				if ( attribute !== undefined ) {
+
+					for ( let i = 0, l = attribute.count; i < l; i ++ ) {
+
+						const point = new Vector3();
+
+						point.fromBufferAttribute( attribute, i ).applyMatrix4( node.matrixWorld );
+
+						points.push( point );
+
+					}
+
+				}
+
+			}
+
+		} );
+
+		return this.setFromPoints( points );
+
+	}
+
+	containsPoint( point ) {
+
+		const faces = this.faces;
+
+		for ( let i = 0, l = faces.length; i < l; i ++ ) {
+
+			const face = faces[ i ];
+
+			// compute signed distance and check on what half space the point lies
+
+			if ( face.distanceToPoint( point ) > this.tolerance ) return false;
+
+		}
+
+		return true;
+
+	}
+
+	intersectRay( ray, target ) {
+
+		// based on "Fast Ray-Convex Polyhedron Intersection" by Eric Haines, GRAPHICS GEMS II
+
+		const faces = this.faces;
+
+		let tNear = - Infinity;
+		let tFar = Infinity;
+
+		for ( let i = 0, l = faces.length; i < l; i ++ ) {
+
+			const face = faces[ i ];
+
+			// interpret faces as planes for the further computation
+
+			const vN = face.distanceToPoint( ray.origin );
+			const vD = face.normal.dot( ray.direction );
+
+			// if the origin is on the positive side of a plane (so the plane can "see" the origin) and
+			// the ray is turned away or parallel to the plane, there is no intersection
+
+			if ( vN > 0 && vD >= 0 ) return null;
+
+			// compute the distance from the ray’s origin to the intersection with the plane
+
+			const t = ( vD !== 0 ) ? ( - vN / vD ) : 0;
+
+			// only proceed if the distance is positive. a negative distance means the intersection point
+			// lies "behind" the origin
+
+			if ( t <= 0 ) continue;
+
+			// now categorized plane as front-facing or back-facing
+
+			if ( vD > 0 ) {
+
+				// plane faces away from the ray, so this plane is a back-face
+
+				tFar = Math.min( t, tFar );
+
+			} else {
+
+				// front-face
+
+				tNear = Math.max( t, tNear );
+
+			}
+
+			if ( tNear > tFar ) {
+
+				// if tNear ever is greater than tFar, the ray must miss the convex hull
+
+				return null;
+
+			}
+
+		}
+
+		// evaluate intersection point
+
+		// always try tNear first since its the closer intersection point
+
+		if ( tNear !== - Infinity ) {
+
+			ray.at( tNear, target );
+
+		} else {
+
+			ray.at( tFar, target );
+
+		}
+
+		return target;
+
+	}
+
+	intersectsRay( ray ) {
+
+		return this.intersectRay( ray, _v1 ) !== null;
+
+	}
+
+	makeEmpty() {
+
+		this.faces = [];
+		this.vertices = [];
+
+		return this;
+
+	}
+
+	// Adds a vertex to the 'assigned' list of vertices and assigns it to the given face
+
+	addVertexToFace( vertex, face ) {
+
+		vertex.face = face;
+
+		if ( face.outside === null ) {
+
+			this.assigned.append( vertex );
+
+		} else {
+
+			this.assigned.insertBefore( face.outside, vertex );
+
+		}
+
+		face.outside = vertex;
+
+		return this;
+
+	}
+
+	// Removes a vertex from the 'assigned' list of vertices and from the given face
+
+	removeVertexFromFace( vertex, face ) {
+
+		if ( vertex === face.outside ) {
+
+			// fix face.outside link
+
+			if ( vertex.next !== null && vertex.next.face === face ) {
+
+				// face has at least 2 outside vertices, move the 'outside' reference
+
+				face.outside = vertex.next;
+
+			} else {
+
+				// vertex was the only outside vertex that face had
+
+				face.outside = null;
+
+			}
+
+		}
+
+		this.assigned.remove( vertex );
+
+		return this;
+
+	}
+
+	// Removes all the visible vertices that a given face is able to see which are stored in the 'assigned' vertex list
+
+	removeAllVerticesFromFace( face ) {
+
+		if ( face.outside !== null ) {
+
+			// reference to the first and last vertex of this face
+
+			const start = face.outside;
+			let end = face.outside;
+
+			while ( end.next !== null && end.next.face === face ) {
+
+				end = end.next;
+
+			}
+
+			this.assigned.removeSubList( start, end );
+
+			// fix references
+
+			start.prev = end.next = null;
+			face.outside = null;
+
+			return start;
+
+		}
+
+	}
+
+	// Removes all the visible vertices that 'face' is able to see
+
+	deleteFaceVertices( face, absorbingFace ) {
+
+		const faceVertices = this.removeAllVerticesFromFace( face );
+
+		if ( faceVertices !== undefined ) {
+
+			if ( absorbingFace === undefined ) {
+
+				// mark the vertices to be reassigned to some other face
+
+				this.unassigned.appendChain( faceVertices );
+
+
+			} else {
+
+				// if there's an absorbing face try to assign as many vertices as possible to it
+
+				let vertex = faceVertices;
+
+				do {
+
+					// we need to buffer the subsequent vertex at this point because the 'vertex.next' reference
+					// will be changed by upcoming method calls
+
+					const nextVertex = vertex.next;
+
+					const distance = absorbingFace.distanceToPoint( vertex.point );
+
+					// check if 'vertex' is able to see 'absorbingFace'
+
+					if ( distance > this.tolerance ) {
+
+						this.addVertexToFace( vertex, absorbingFace );
+
+					} else {
+
+						this.unassigned.append( vertex );
+
+					}
+
+					// now assign next vertex
+
+					vertex = nextVertex;
+
+				} while ( vertex !== null );
+
+			}
+
+		}
+
+		return this;
+
+	}
+
+	// Reassigns as many vertices as possible from the unassigned list to the new faces
+
+	resolveUnassignedPoints( newFaces ) {
+
+		if ( this.unassigned.isEmpty() === false ) {
+
+			let vertex = this.unassigned.first();
+
+			do {
+
+				// buffer 'next' reference, see .deleteFaceVertices()
+
+				const nextVertex = vertex.next;
+
+				let maxDistance = this.tolerance;
+
+				let maxFace = null;
+
+				for ( let i = 0; i < newFaces.length; i ++ ) {
+
+					const face = newFaces[ i ];
+
+					if ( face.mark === Visible ) {
+
+						const distance = face.distanceToPoint( vertex.point );
+
+						if ( distance > maxDistance ) {
+
+							maxDistance = distance;
+							maxFace = face;
+
+						}
+
+						if ( maxDistance > 1000 * this.tolerance ) break;
+
+					}
+
+				}
+
+				// 'maxFace' can be null e.g. if there are identical vertices
+
+				if ( maxFace !== null ) {
+
+					this.addVertexToFace( vertex, maxFace );
+
+				}
+
+				vertex = nextVertex;
+
+			} while ( vertex !== null );
+
+		}
+
+		return this;
+
+	}
+
+	// Computes the extremes of a simplex which will be the initial hull
+
+	computeExtremes() {
+
+		const min = new Vector3();
+		const max = new Vector3();
+
+		const minVertices = [];
+		const maxVertices = [];
+
+		// initially assume that the first vertex is the min/max
+
+		for ( let i = 0; i < 3; i ++ ) {
+
+			minVertices[ i ] = maxVertices[ i ] = this.vertices[ 0 ];
+
+		}
+
+		min.copy( this.vertices[ 0 ].point );
+		max.copy( this.vertices[ 0 ].point );
+
+		// compute the min/max vertex on all six directions
+
+		for ( let i = 0, l = this.vertices.length; i < l; i ++ ) {
+
+			const vertex = this.vertices[ i ];
+			const point = vertex.point;
+
+			// update the min coordinates
+
+			for ( let j = 0; j < 3; j ++ ) {
+
+				if ( point.getComponent( j ) < min.getComponent( j ) ) {
+
+					min.setComponent( j, point.getComponent( j ) );
+					minVertices[ j ] = vertex;
+
+				}
+
+			}
+
+			// update the max coordinates
+
+			for ( let j = 0; j < 3; j ++ ) {
+
+				if ( point.getComponent( j ) > max.getComponent( j ) ) {
+
+					max.setComponent( j, point.getComponent( j ) );
+					maxVertices[ j ] = vertex;
+
+				}
+
+			}
+
+		}
+
+		// use min/max vectors to compute an optimal epsilon
+
+		this.tolerance = 3 * Number.EPSILON * (
+			Math.max( Math.abs( min.x ), Math.abs( max.x ) ) +
+			Math.max( Math.abs( min.y ), Math.abs( max.y ) ) +
+			Math.max( Math.abs( min.z ), Math.abs( max.z ) )
+		);
+
+		return { min: minVertices, max: maxVertices };
+
+	}
+
+	// Computes the initial simplex assigning to its faces all the points
+	// that are candidates to form part of the hull
+
+	computeInitialHull() {
+
+		const vertices = this.vertices;
+		const extremes = this.computeExtremes();
+		const min = extremes.min;
+		const max = extremes.max;
+
+		// 1. Find the two vertices 'v0' and 'v1' with the greatest 1d separation
+		// (max.x - min.x)
+		// (max.y - min.y)
+		// (max.z - min.z)
+
+		let maxDistance = 0;
+		let index = 0;
+
+		for ( let i = 0; i < 3; i ++ ) {
+
+			const distance = max[ i ].point.getComponent( i ) - min[ i ].point.getComponent( i );
+
+			if ( distance > maxDistance ) {
+
+				maxDistance = distance;
+				index = i;
+
+			}
+
+		}
+
+		const v0 = min[ index ];
+		const v1 = max[ index ];
+		let v2;
+		let v3;
+
+		// 2. The next vertex 'v2' is the one farthest to the line formed by 'v0' and 'v1'
+
+		maxDistance = 0;
+		_line3.set( v0.point, v1.point );
+
+		for ( let i = 0, l = this.vertices.length; i < l; i ++ ) {
+
+			const vertex = vertices[ i ];
+
+			if ( vertex !== v0 && vertex !== v1 ) {
+
+				_line3.closestPointToPoint( vertex.point, true, _closestPoint );
+
+				const distance = _closestPoint.distanceToSquared( vertex.point );
+
+				if ( distance > maxDistance ) {
+
+					maxDistance = distance;
+					v2 = vertex;
+
+				}
+
+			}
+
+		}
+
+		// 3. The next vertex 'v3' is the one farthest to the plane 'v0', 'v1', 'v2'
+
+		maxDistance = - 1;
+		_plane.setFromCoplanarPoints( v0.point, v1.point, v2.point );
+
+		for ( let i = 0, l = this.vertices.length; i < l; i ++ ) {
+
+			const vertex = vertices[ i ];
+
+			if ( vertex !== v0 && vertex !== v1 && vertex !== v2 ) {
+
+				const distance = Math.abs( _plane.distanceToPoint( vertex.point ) );
+
+				if ( distance > maxDistance ) {
+
+					maxDistance = distance;
+					v3 = vertex;
+
+				}
+
+			}
+
+		}
+
+		const faces = [];
+
+		if ( _plane.distanceToPoint( v3.point ) < 0 ) {
+
+			// the face is not able to see the point so 'plane.normal' is pointing outside the tetrahedron
+
+			faces.push(
+				Face.create( v0, v1, v2 ),
+				Face.create( v3, v1, v0 ),
+				Face.create( v3, v2, v1 ),
+				Face.create( v3, v0, v2 )
+			);
+
+			// set the twin edge
+
+			for ( let i = 0; i < 3; i ++ ) {
+
+				const j = ( i + 1 ) % 3;
+
+				// join face[ i ] i > 0, with the first face
+
+				faces[ i + 1 ].getEdge( 2 ).setTwin( faces[ 0 ].getEdge( j ) );
+
+				// join face[ i ] with face[ i + 1 ], 1 <= i <= 3
+
+				faces[ i + 1 ].getEdge( 1 ).setTwin( faces[ j + 1 ].getEdge( 0 ) );
+
+			}
+
+		} else {
+
+			// the face is able to see the point so 'plane.normal' is pointing inside the tetrahedron
+
+			faces.push(
+				Face.create( v0, v2, v1 ),
+				Face.create( v3, v0, v1 ),
+				Face.create( v3, v1, v2 ),
+				Face.create( v3, v2, v0 )
+			);
+
+			// set the twin edge
+
+			for ( let i = 0; i < 3; i ++ ) {
+
+				const j = ( i + 1 ) % 3;
+
+				// join face[ i ] i > 0, with the first face
+
+				faces[ i + 1 ].getEdge( 2 ).setTwin( faces[ 0 ].getEdge( ( 3 - i ) % 3 ) );
+
+				// join face[ i ] with face[ i + 1 ]
+
+				faces[ i + 1 ].getEdge( 0 ).setTwin( faces[ j + 1 ].getEdge( 1 ) );
+
+			}
+
+		}
+
+		// the initial hull is the tetrahedron
+
+		for ( let i = 0; i < 4; i ++ ) {
+
+			this.faces.push( faces[ i ] );
+
+		}
+
+		// initial assignment of vertices to the faces of the tetrahedron
+
+		for ( let i = 0, l = vertices.length; i < l; i ++ ) {
+
+			const vertex = vertices[ i ];
+
+			if ( vertex !== v0 && vertex !== v1 && vertex !== v2 && vertex !== v3 ) {
+
+				maxDistance = this.tolerance;
+				let maxFace = null;
+
+				for ( let j = 0; j < 4; j ++ ) {
+
+					const distance = this.faces[ j ].distanceToPoint( vertex.point );
+
+					if ( distance > maxDistance ) {
+
+						maxDistance = distance;
+						maxFace = this.faces[ j ];
+
+					}
+
+				}
+
+				if ( maxFace !== null ) {
+
+					this.addVertexToFace( vertex, maxFace );
+
+				}
+
+			}
+
+		}
+
+		return this;
+
+	}
+
+	// Removes inactive faces
+
+	reindexFaces() {
+
+		const activeFaces = [];
+
+		for ( let i = 0; i < this.faces.length; i ++ ) {
+
+			const face = this.faces[ i ];
+
+			if ( face.mark === Visible ) {
+
+				activeFaces.push( face );
+
+			}
+
+		}
+
+		this.faces = activeFaces;
+
+		return this;
+
+	}
+
+	// Finds the next vertex to create faces with the current hull
+
+	nextVertexToAdd() {
+
+		// if the 'assigned' list of vertices is empty, no vertices are left. return with 'undefined'
+
+		if ( this.assigned.isEmpty() === false ) {
+
+			let eyeVertex, maxDistance = 0;
+
+			// grap the first available face and start with the first visible vertex of that face
+
+			const eyeFace = this.assigned.first().face;
+			let vertex = eyeFace.outside;
+
+			// now calculate the farthest vertex that face can see
+
+			do {
+
+				const distance = eyeFace.distanceToPoint( vertex.point );
+
+				if ( distance > maxDistance ) {
+
+					maxDistance = distance;
+					eyeVertex = vertex;
+
+				}
+
+				vertex = vertex.next;
+
+			} while ( vertex !== null && vertex.face === eyeFace );
+
+			return eyeVertex;
+
+		}
+
+	}
+
+	// Computes a chain of half edges in CCW order called the 'horizon'.
+	// For an edge to be part of the horizon it must join a face that can see
+	// 'eyePoint' and a face that cannot see 'eyePoint'.
+
+	computeHorizon( eyePoint, crossEdge, face, horizon ) {
+
+		// moves face's vertices to the 'unassigned' vertex list
+
+		this.deleteFaceVertices( face );
+
+		face.mark = Deleted;
+
+		let edge;
+
+		if ( crossEdge === null ) {
+
+			edge = crossEdge = face.getEdge( 0 );
+
+		} else {
+
+			// start from the next edge since 'crossEdge' was already analyzed
+			// (actually 'crossEdge.twin' was the edge who called this method recursively)
+
+			edge = crossEdge.next;
+
+		}
+
+		do {
+
+			const twinEdge = edge.twin;
+			const oppositeFace = twinEdge.face;
+
+			if ( oppositeFace.mark === Visible ) {
+
+				if ( oppositeFace.distanceToPoint( eyePoint ) > this.tolerance ) {
+
+					// the opposite face can see the vertex, so proceed with next edge
+
+					this.computeHorizon( eyePoint, twinEdge, oppositeFace, horizon );
+
+				} else {
+
+					// the opposite face can't see the vertex, so this edge is part of the horizon
+
+					horizon.push( edge );
+
+				}
+
+			}
+
+			edge = edge.next;
+
+		} while ( edge !== crossEdge );
+
+		return this;
+
+	}
+
+	// Creates a face with the vertices 'eyeVertex.point', 'horizonEdge.tail' and 'horizonEdge.head' in CCW order
+
+	addAdjoiningFace( eyeVertex, horizonEdge ) {
+
+		// all the half edges are created in ccw order thus the face is always pointing outside the hull
+
+		const face = Face.create( eyeVertex, horizonEdge.tail(), horizonEdge.head() );
+
+		this.faces.push( face );
+
+		// join face.getEdge( - 1 ) with the horizon's opposite edge face.getEdge( - 1 ) = face.getEdge( 2 )
+
+		face.getEdge( - 1 ).setTwin( horizonEdge.twin );
+
+		return face.getEdge( 0 ); // the half edge whose vertex is the eyeVertex
+
+
+	}
+
+	//  Adds 'horizon.length' faces to the hull, each face will be linked with the
+	//  horizon opposite face and the face on the left/right
+
+	addNewFaces( eyeVertex, horizon ) {
+
+		this.newFaces = [];
+
+		let firstSideEdge = null;
+		let previousSideEdge = null;
+
+		for ( let i = 0; i < horizon.length; i ++ ) {
+
+			const horizonEdge = horizon[ i ];
+
+			// returns the right side edge
+
+			const sideEdge = this.addAdjoiningFace( eyeVertex, horizonEdge );
+
+			if ( firstSideEdge === null ) {
+
+				firstSideEdge = sideEdge;
+
+			} else {
+
+				// joins face.getEdge( 1 ) with previousFace.getEdge( 0 )
+
+				sideEdge.next.setTwin( previousSideEdge );
+
+			}
+
+			this.newFaces.push( sideEdge.face );
+			previousSideEdge = sideEdge;
+
+		}
+
+		// perform final join of new faces
+
+		firstSideEdge.next.setTwin( previousSideEdge );
+
+		return this;
+
+	}
+
+	// Adds a vertex to the hull
+
+	addVertexToHull( eyeVertex ) {
+
+		const horizon = [];
+
+		this.unassigned.clear();
+
+		// remove 'eyeVertex' from 'eyeVertex.face' so that it can't be added to the 'unassigned' vertex list
+
+		this.removeVertexFromFace( eyeVertex, eyeVertex.face );
+
+		this.computeHorizon( eyeVertex.point, null, eyeVertex.face, horizon );
+
+		this.addNewFaces( eyeVertex, horizon );
+
+		// reassign 'unassigned' vertices to the new faces
+
+		this.resolveUnassignedPoints( this.newFaces );
+
+		return	this;
+
+	}
+
+	cleanup() {
+
+		this.assigned.clear();
+		this.unassigned.clear();
+		this.newFaces = [];
+
+		return this;
+
+	}
+
+	compute() {
+
+		let vertex;
+
+		this.computeInitialHull();
+
+		// add all available vertices gradually to the hull
+
+		while ( ( vertex = this.nextVertexToAdd() ) !== undefined ) {
+
+			this.addVertexToHull( vertex );
+
+		}
+
+		this.reindexFaces();
+
+		this.cleanup();
+
+		return this;
+
+	}
+
+}
+
+//
+
+class Face {
+
+	constructor() {
+
+		this.normal = new Vector3();
+		this.midpoint = new Vector3();
+		this.area = 0;
+
+		this.constant = 0; // signed distance from face to the origin
+		this.outside = null; // reference to a vertex in a vertex list this face can see
+		this.mark = Visible;
+		this.edge = null;
+
+	}
+
+	static create( a, b, c ) {
+
+		const face = new Face();
+
+		const e0 = new HalfEdge( a, face );
+		const e1 = new HalfEdge( b, face );
+		const e2 = new HalfEdge( c, face );
+
+		// join edges
+
+		e0.next = e2.prev = e1;
+		e1.next = e0.prev = e2;
+		e2.next = e1.prev = e0;
+
+		// main half edge reference
+
+		face.edge = e0;
+
+		return face.compute();
+
+	}
+
+	getEdge( i ) {
+
+		let edge = this.edge;
+
+		while ( i > 0 ) {
+
+			edge = edge.next;
+			i --;
+
+		}
+
+		while ( i < 0 ) {
+
+			edge = edge.prev;
+			i ++;
+
+		}
+
+		return edge;
+
+	}
+
+	compute() {
+
+		const a = this.edge.tail();
+		const b = this.edge.head();
+		const c = this.edge.next.head();
+
+		_triangle.set( a.point, b.point, c.point );
+
+		_triangle.getNormal( this.normal );
+		_triangle.getMidpoint( this.midpoint );
+		this.area = _triangle.getArea();
+
+		this.constant = this.normal.dot( this.midpoint );
+
+		return this;
+
+	}
+
+	distanceToPoint( point ) {
+
+		return this.normal.dot( point ) - this.constant;
+
+	}
+
+}
+
+// Entity for a Doubly-Connected Edge List (DCEL).
+
+class HalfEdge {
+
+
+	constructor( vertex, face ) {
+
+		this.vertex = vertex;
+		this.prev = null;
+		this.next = null;
+		this.twin = null;
+		this.face = face;
+
+	}
+
+	head() {
+
+		return this.vertex;
+
+	}
+
+	tail() {
+
+		return this.prev ? this.prev.vertex : null;
+
+	}
+
+	length() {
+
+		const head = this.head();
+		const tail = this.tail();
+
+		if ( tail !== null ) {
+
+			return tail.point.distanceTo( head.point );
+
+		}
+
+		return - 1;
+
+	}
+
+	lengthSquared() {
+
+		const head = this.head();
+		const tail = this.tail();
+
+		if ( tail !== null ) {
+
+			return tail.point.distanceToSquared( head.point );
+
+		}
+
+		return - 1;
+
+	}
+
+	setTwin( edge ) {
+
+		this.twin = edge;
+		edge.twin = this;
+
+		return this;
+
+	}
+
+}
+
+// A vertex as a double linked list node.
+
+class VertexNode {
+
+	constructor( point ) {
+
+		this.point = point;
+		this.prev = null;
+		this.next = null;
+		this.face = null; // the face that is able to see this vertex
+
+	}
+
+}
+
+// A double linked list that contains vertex nodes.
+
+class VertexList {
+
+	constructor() {
+
+		this.head = null;
+		this.tail = null;
+
+	}
+
+	first() {
+
+		return this.head;
+
+	}
+
+	last() {
+
+		return this.tail;
+
+	}
+
+	clear() {
+
+		this.head = this.tail = null;
+
+		return this;
+
+	}
+
+	// Inserts a vertex before the target vertex
+
+	insertBefore( target, vertex ) {
+
+		vertex.prev = target.prev;
+		vertex.next = target;
+
+		if ( vertex.prev === null ) {
+
+			this.head = vertex;
+
+		} else {
+
+			vertex.prev.next = vertex;
+
+		}
+
+		target.prev = vertex;
+
+		return this;
+
+	}
+
+	// Inserts a vertex after the target vertex
+
+	insertAfter( target, vertex ) {
+
+		vertex.prev = target;
+		vertex.next = target.next;
+
+		if ( vertex.next === null ) {
+
+			this.tail = vertex;
+
+		} else {
+
+			vertex.next.prev = vertex;
+
+		}
+
+		target.next = vertex;
+
+		return this;
+
+	}
+
+	// Appends a vertex to the end of the linked list
+
+	append( vertex ) {
+
+		if ( this.head === null ) {
+
+			this.head = vertex;
+
+		} else {
+
+			this.tail.next = vertex;
+
+		}
+
+		vertex.prev = this.tail;
+		vertex.next = null; // the tail has no subsequent vertex
+
+		this.tail = vertex;
+
+		return this;
+
+	}
+
+	// Appends a chain of vertices where 'vertex' is the head.
+
+	appendChain( vertex ) {
+
+		if ( this.head === null ) {
+
+			this.head = vertex;
+
+		} else {
+
+			this.tail.next = vertex;
+
+		}
+
+		vertex.prev = this.tail;
+
+		// ensure that the 'tail' reference points to the last vertex of the chain
+
+		while ( vertex.next !== null ) {
+
+			vertex = vertex.next;
+
+		}
+
+		this.tail = vertex;
+
+		return this;
+
+	}
+
+	// Removes a vertex from the linked list
+
+	remove( vertex ) {
+
+		if ( vertex.prev === null ) {
+
+			this.head = vertex.next;
+
+		} else {
+
+			vertex.prev.next = vertex.next;
+
+		}
+
+		if ( vertex.next === null ) {
+
+			this.tail = vertex.prev;
+
+		} else {
+
+			vertex.next.prev = vertex.prev;
+
+		}
+
+		return this;
+
+	}
+
+	// Removes a list of vertices whose 'head' is 'a' and whose 'tail' is b
+
+	removeSubList( a, b ) {
+
+		if ( a.prev === null ) {
+
+			this.head = b.next;
+
+		} else {
+
+			a.prev.next = b.next;
+
+		}
+
+		if ( b.next === null ) {
+
+			this.tail = a.prev;
+
+		} else {
+
+			b.next.prev = a.prev;
+
+		}
+
+		return this;
+
+	}
+
+	isEmpty() {
+
+		return this.head === null;
+
+	}
+
+}
+
+class ConvexGeometry extends BufferGeometry {
+
+	constructor( points = [] ) {
+
+		super();
+
+		// buffers
+
+		const vertices = [];
+		const normals = [];
+
+		const convexHull = new ConvexHull().setFromPoints( points );
+
+		// generate vertices and normals
+
+		const faces = convexHull.faces;
+
+		for ( let i = 0; i < faces.length; i ++ ) {
+
+			const face = faces[ i ];
+			let edge = face.edge;
+
+			// we move along a doubly-connected edge list to access all face points (see HalfEdge docs)
+
+			do {
+
+				const point = edge.head().point;
+
+				vertices.push( point.x, point.y, point.z );
+				normals.push( face.normal.x, face.normal.y, face.normal.z );
+
+				edge = edge.next;
+
+			} while ( edge !== face.edge );
+
+		}
+
+		// build geometry
+
+		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
+
+	}
+
+}
+
+class Simplex {
+  points = [];
+  size = 0;
+  constructor() {
+    this.points = [];
+    this.size = 0;
+  }
+  assign(points) {
+    for (const i in points) {
+      const v = points[i];
+      this.points[i] = v;
+    }
+    this.size = points.length;
+    return this;
+  }
+  push_front(point) {
+    this.points = [point, this.points[0], this.points[1], this.points[2]];
+    this.size = Math.min(this.size + 1, this.points.length);
+  }
+}
+
+class Support {
+  point;
+  witnessA;
+  witnessB;
+  constructor(witnessA, witnessB) {
+    this.witnessA = witnessA;
+    this.witnessB = witnessB;
+    this.point = new Vec3().subVectors(
+      witnessA,
+      witnessB
+    );
+  }
+}
+
+class GjkEpa {
+  debugMinkowski;
+  debugSimplex;
+  debugPolytope;
+  debugNormal = new ArrowHelper();
+  debug = false;
+  constructor() {
+    Game.gui.debug.add(this, "debug").name("Debug GJK / EPA");
+  }
+  GJK(colliderA, colliderB) {
+    const support = this.support(colliderA, colliderB, new Vec3(0, 1, 0));
+    const simplex = new Simplex();
+    simplex.push_front(support);
+    const direction = support.point.clone().multiplyScalar(-1);
+    while (true) {
+      const support2 = this.support(colliderA, colliderB, direction);
+      if (support2.point.dot(direction) <= 0)
+        return;
+      simplex.push_front(support2);
+      if (this.nextSimplex(simplex, direction)) {
+        return simplex;
+      }
+    }
+  }
+  /**
+   * Returns the vertex on the Minkowski difference
+   */
+  support(colliderA, colliderB, direction) {
+    const witnessA = colliderA.findFurthestPoint(direction);
+    const witnessB = colliderB.findFurthestPoint(direction.clone().multiplyScalar(-1));
+    return new Support(witnessA, witnessB);
+  }
+  nextSimplex(simplex, direction) {
+    switch (simplex.size) {
+      case 2:
+        return this.Line(simplex, direction);
+      case 3:
+        return this.Triangle(simplex, direction);
+      case 4:
+        return this.Tetrahedron(simplex, direction);
+    }
+    return false;
+  }
+  sameDirection(direction, ao) {
+    return direction.dot(ao) > 0;
+  }
+  Line(simplex, direction) {
+    const a = simplex.points[0];
+    const b = simplex.points[1];
+    const ab = new Vec3().subVectors(b.point, a.point);
+    const ao = a.point.clone().multiplyScalar(-1);
+    if (this.sameDirection(ab, ao)) {
+      direction.copy(ab.clone().cross(ao).clone().cross(ab));
+    } else {
+      simplex.assign([a]);
+      direction.copy(ao);
+    }
+    return false;
+  }
+  Triangle(simplex, direction) {
+    const a = simplex.points[0];
+    const b = simplex.points[1];
+    const c = simplex.points[2];
+    const ab = new Vec3().subVectors(b.point, a.point);
+    const ac = new Vec3().subVectors(c.point, a.point);
+    const ao = a.point.clone().multiplyScalar(-1);
+    const abc = ab.clone().cross(ac);
+    if (this.sameDirection(abc.clone().cross(ac), ao)) {
+      if (this.sameDirection(ac, ao)) {
+        simplex.assign([a, c]);
+        direction.copy(ac.clone().cross(ao).clone().cross(ac));
+      } else {
+        simplex.assign([a, c]);
+        return this.Line(simplex, direction);
+      }
+    } else {
+      if (this.sameDirection(ab.clone().cross(abc), ao)) {
+        simplex.assign([a, b]);
+        return this.Line(simplex, direction);
+      } else {
+        if (this.sameDirection(abc, ao)) {
+          direction.copy(abc);
+        } else {
+          simplex.assign([a, c, b]);
+          direction.copy(abc.multiplyScalar(-1));
+        }
+      }
+    }
+    return false;
+  }
+  Tetrahedron(simplex, direction) {
+    const a = simplex.points[0];
+    const b = simplex.points[1];
+    const c = simplex.points[2];
+    const d = simplex.points[3];
+    const ab = new Vec3().subVectors(b.point, a.point);
+    const ac = new Vec3().subVectors(c.point, a.point);
+    const ad = new Vec3().subVectors(d.point, a.point);
+    const ao = a.point.clone().multiplyScalar(-1);
+    const abc = ab.clone().cross(ac);
+    const acd = ac.clone().cross(ad);
+    const adb = ad.clone().cross(ab);
+    if (this.sameDirection(abc, ao)) {
+      simplex.assign([a, b, c]);
+      return this.Triangle(simplex, direction);
+    }
+    if (this.sameDirection(acd, ao)) {
+      simplex.assign([a, c, d]);
+      return this.Triangle(simplex, direction);
+    }
+    if (this.sameDirection(adb, ao)) {
+      simplex.assign([a, d, b]);
+      return this.Triangle(simplex, direction);
+    }
+    return true;
+  }
+  /**
+   * EPA algorithm
+   * 
+   * https://github.com/IainWinter/IwEngine/blob/master/IwEngine/src/physics/impl/GJK.cpp
+   */
+  EPA(simplex, colliderA, colliderB) {
+    const polytope = [];
+    for (let i = 0; i < simplex.size; i++)
+      polytope.push(simplex.points[i]);
+    const faces = [
+      0,
+      1,
+      2,
+      0,
+      3,
+      1,
+      0,
+      2,
+      3,
+      1,
+      3,
+      2
+    ];
+    let {
+      normals,
+      minTriangle: minFace,
+      polygon: minPolygon
+    } = this.getFaceNormals(polytope, faces);
+    const minNormal = new Vec3();
+    let minDistance = Infinity;
+    let iterations = 0;
+    while (minDistance == Infinity) {
+      minNormal.set(normals[minFace].x, normals[minFace].y, normals[minFace].z);
+      minDistance = normals[minFace].w;
+      if (iterations++ > 50) {
+        break;
+      }
+      const witnessA = colliderA.findFurthestPoint(minNormal);
+      const witnessB = colliderB.findFurthestPoint(minNormal.clone().multiplyScalar(-1));
+      const support = new Support(witnessA, witnessB);
+      const sDistance = minNormal.dot(support.point);
+      if (Math.abs(sDistance - minDistance) > 1e-3) {
+        minDistance = Infinity;
+        const uniqueEdges = [];
+        for (let i = 0; i < normals.length; i++) {
+          const n = new Vec3(normals[i].x, normals[i].y, normals[i].z);
+          if (this.sameDirection(n, support.point)) {
+            const f = i * 3;
+            this.addIfUniqueEdge(uniqueEdges, faces, f + 0, f + 1);
+            this.addIfUniqueEdge(uniqueEdges, faces, f + 1, f + 2);
+            this.addIfUniqueEdge(uniqueEdges, faces, f + 2, f + 0);
+            faces[f + 2] = faces[faces.length - 1];
+            faces.pop();
+            faces[f + 1] = faces[faces.length - 1];
+            faces.pop();
+            faces[f + 0] = faces[faces.length - 1];
+            faces.pop();
+            normals[i].copy(normals[normals.length - 1]);
+            normals.pop();
+            i--;
+          }
+        }
+        if (uniqueEdges.length == 0)
+          break;
+        const newFaces = [];
+        for (const [edge1, edge2] of uniqueEdges) {
+          newFaces.push(edge1);
+          newFaces.push(edge2);
+          newFaces.push(polytope.length);
+        }
+        polytope.push(support);
+        const {
+          normals: newNormals,
+          minTriangle: newMinFace,
+          polygon: newPolygon
+        } = this.getFaceNormals(polytope, newFaces);
+        let newMinDistance = Infinity;
+        for (let i = 0; i < normals.length; i++) {
+          if (normals[i].w < newMinDistance) {
+            newMinDistance = normals[i].w;
+            minFace = i;
+          }
+        }
+        if (newNormals[newMinFace].w < newMinDistance) {
+          minFace = newMinFace + normals.length;
+          minPolygon = newPolygon;
+        }
+        faces.push(...newFaces);
+        normals.push(...newNormals);
+      }
+    }
+    if (minDistance == Infinity)
+      return;
+    if (this.debugMinkowski)
+      Game.scene?.scene.remove(this.debugMinkowski);
+    if (this.debugPolytope)
+      Game.scene?.scene.remove(this.debugPolytope);
+    if (this.debugNormal)
+      Game.scene?.scene.remove(this.debugNormal);
+    if (Game.debugOverlay && this.debug) {
+      this.debugNormal = new ArrowHelper(minNormal);
+      this.debugNormal.setColor(65535);
+      Game.scene?.scene.add(this.debugNormal);
+    }
+    if (Game.debugOverlay && this.debug) {
+      const newVertices = [];
+      colliderA.verticesWorldSpace.forEach((v1) => {
+        colliderB.verticesWorldSpace.forEach((v2) => {
+          const newVertex = new Vec3(
+            v1.x - v2.x,
+            v1.y - v2.y,
+            v1.z - v2.z
+          );
+          newVertices.push(newVertex);
+        });
+      });
+      this.debugMinkowski = new Mesh(
+        new ConvexGeometry(newVertices),
+        new MeshBasicMaterial({ color: 4473924, wireframe: true, wireframeLinewidth: 3, transparent: true, opacity: 0.5 })
+      );
+      Game.scene?.scene.add(this.debugMinkowski);
+    }
+    if (Game.debugOverlay && this.debug) {
+      const points = polytope;
+      const bufferGeometry = new BufferGeometry();
+      const indices = new Uint32Array(faces);
+      const positions = new Float32Array(points.length * 3);
+      points.forEach((support, i) => {
+        positions[i * 3] = support.point.x;
+        positions[i * 3 + 1] = support.point.y;
+        positions[i * 3 + 2] = support.point.z;
+      });
+      bufferGeometry.setAttribute("position", new BufferAttribute(positions, 3));
+      bufferGeometry.setIndex(new BufferAttribute(indices, 1));
+      this.debugPolytope = new Mesh(bufferGeometry, new MeshBasicMaterial({ color: 16711680, wireframe: true, wireframeLinewidth: 3, transparent: true, opacity: 0.5 }));
+      Game.scene?.scene.add(this.debugPolytope);
+    }
+    const contactPoint = Vec3.mul(minNormal, minDistance);
+    const barycentric = this.computeBarycentricCoordinates(contactPoint, minPolygon);
+    let a = new Vec3().addScaledVector(minPolygon[0].witnessA, barycentric.x);
+    let b = new Vec3().addScaledVector(minPolygon[1].witnessA, barycentric.y);
+    let c = new Vec3().addScaledVector(minPolygon[2].witnessA, barycentric.z);
+    const p1 = Vec3.add(a, b).add(c);
+    a = new Vec3().addScaledVector(minPolygon[0].witnessB, barycentric.x);
+    b = new Vec3().addScaledVector(minPolygon[1].witnessB, barycentric.y);
+    c = new Vec3().addScaledVector(minPolygon[2].witnessB, barycentric.z);
+    const p2 = Vec3.add(a, b).add(c);
+    return {
+      normal: minNormal,
+      p1,
+      p2,
+      d: minDistance
+    };
+  }
+  computeBarycentricCoordinates(P, polygon) {
+    const A = polygon[0].point;
+    const B = polygon[1].point;
+    const C = polygon[2].point;
+    const v0 = B.clone().sub(A);
+    const v1 = C.clone().sub(A);
+    const v2 = P.clone().sub(A);
+    const dot00 = v0.dot(v0);
+    const dot01 = v0.dot(v1);
+    const dot02 = v0.dot(v2);
+    const dot11 = v1.dot(v1);
+    const dot12 = v1.dot(v2);
+    const denom = dot00 * dot11 - dot01 * dot01;
+    const v = (dot11 * dot02 - dot01 * dot12) / denom;
+    const w = (dot00 * dot12 - dot01 * dot02) / denom;
+    const u = 1 - v - w;
+    return new Vec3(u, v, w);
+  }
+  getFaceNormals(polytope, faces) {
+    const normals = [];
+    let minTriangle = 0;
+    let minDistance = Infinity;
+    let polygon = [];
+    for (let i = 0; i < faces.length; i += 3) {
+      const a = polytope[faces[i + 0]];
+      const b = polytope[faces[i + 1]];
+      const c = polytope[faces[i + 2]];
+      const normal = new Vec3().subVectors(b.point, a.point).cross(c.point.clone().sub(a.point)).normalize();
+      let distance = normal.dot(a.point);
+      if (distance < 0) {
+        normal.multiplyScalar(-1);
+        distance *= -1;
+      }
+      normals.push(new Vector4(
+        normal.x,
+        normal.y,
+        normal.z,
+        distance
+      ));
+      if (distance < minDistance) {
+        minTriangle = i / 3;
+        minDistance = distance;
+        polygon[0] = a;
+        polygon[1] = b;
+        polygon[2] = c;
+      }
+    }
+    return {
+      normals,
+      minTriangle,
+      polygon
+    };
+  }
+  addIfUniqueEdge(edges, faces, a, b) {
+    const reverse = edges.find((edge) => edge[0] === faces[b] && edge[1] === faces[a]);
+    if (reverse !== void 0) {
+      const index = edges.indexOf(reverse);
+      edges.splice(index, 1);
+    } else {
+      edges.push([faces[a], faces[b]]);
+    }
+  }
+}
+
 class XPBDSolver extends BaseSolver {
   numSubsteps = 20;
+  narrowPhase = new GjkEpa();
   static h = 0;
+  constructor() {
+    super();
+    Game.gui.solver.add(this, "numSubsteps", 1, 30);
+  }
   update(bodies, constraints, dt, gravity) {
     if (dt === 0)
       return;
@@ -32791,10 +37116,19 @@ class XPBDSolver extends BaseSolver {
         const guid = [A.id, B.id].sort().toString();
         if (combinations.includes(guid))
           continue;
+        combinations.push(guid);
         const collisionMargin = 2 * dt * Vec3.sub(A.vel, B.vel).length();
         switch (A.collider.colliderType) {
           case ColliderType.ConvexMesh:
             switch (B.collider.colliderType) {
+              case ColliderType.ConvexMesh: {
+                const aabb1 = A.collider.aabb.clone().expandByScalar(collisionMargin);
+                const aabb2 = B.collider.aabb.clone().expandByScalar(collisionMargin);
+                if (aabb1.intersectsBox(aabb2)) {
+                  collisions.push(new CollisionPair(A, B));
+                }
+                break;
+              }
               case ColliderType.Plane: {
                 const MC = A.collider;
                 const PC = B.collider;
@@ -32802,7 +37136,7 @@ class XPBDSolver extends BaseSolver {
                 let deepestPenetration = 0;
                 for (let i = 0; i < MC.uniqueIndices.length; i++) {
                   const v = MC.vertices[MC.uniqueIndices[i]];
-                  const contactPointW = CoordinateSystem.localToWorld(v, A.pose.q, A.pose.p);
+                  const contactPointW = A.localToWorld(v);
                   const signedDistance = contactPointW.clone().sub(B.pose.p).dot(N);
                   deepestPenetration = Math.min(deepestPenetration, signedDistance);
                 }
@@ -32826,6 +37160,10 @@ class XPBDSolver extends BaseSolver {
       switch (A.collider.colliderType) {
         case ColliderType.ConvexMesh:
           switch (B.collider.colliderType) {
+            case ColliderType.ConvexMesh: {
+              this._meshMeshContact(contacts, A, B);
+              break;
+            }
             case ColliderType.Plane: {
               this._meshPlaneContact(contacts, A, B);
               break;
@@ -32836,6 +37174,26 @@ class XPBDSolver extends BaseSolver {
     }
     return contacts;
   }
+  _meshMeshContact(contacts, A, B) {
+    const simplex = this.narrowPhase.GJK(A.collider, B.collider);
+    if (simplex) {
+      const EPA = this.narrowPhase.EPA(simplex, A.collider, B.collider);
+      if (!EPA)
+        return;
+      const { normal, p1, p2, d } = EPA;
+      if (d <= 0)
+        return;
+      const contact = new ContactSet(
+        A,
+        B,
+        normal.clone().multiplyScalar(-1),
+        p1,
+        p2
+      );
+      contacts.push(contact);
+      this.debugContact(contact);
+    }
+  }
   _meshPlaneContact(contacts, A, B) {
     const MC = A.collider;
     const PC = B.collider;
@@ -32843,28 +37201,14 @@ class XPBDSolver extends BaseSolver {
     for (let i = 0; i < MC.uniqueIndices.length; i++) {
       const v = MC.vertices[MC.uniqueIndices[i]];
       const r1 = v;
-      const p1 = CoordinateSystem.localToWorld(v, A.pose.q, A.pose.p);
+      const p1 = A.localToWorld(v);
       const signedDistance = Vec3.dot(N, Vec3.sub(p1, B.pose.p));
       const p2 = Vec3.sub(p1, Vec3.mul(N, signedDistance));
-      const r2 = CoordinateSystem.worldToLocal(p2, B.pose.q, B.pose.p);
+      const r2 = B.worldToLocal(p2);
       const d = -signedDistance;
       if (d <= 0)
         continue;
-      const contact = new ContactSet(A, B, N);
-      contact.d = signedDistance;
-      contact.r1 = r1;
-      contact.r2 = r2;
-      contact.p1 = p1;
-      contact.p2 = p2;
-      contact.vrel = Vec3.sub(
-        contact.A.getVelocityAt(contact.p1),
-        contact.B.getVelocityAt(contact.p2)
-      );
-      contact.vn = contact.vrel.dot(contact.n);
-      contact.e = 0.5 * (A.bounciness + B.bounciness);
-      contact.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
-      contact.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
-      this.debugContact(contact);
+      const contact = new ContactSet(A, B, N, p1, p2, r1, r2);
       contacts.push(contact);
     }
   }
@@ -33026,7 +37370,7 @@ class BaseConstraint {
   globalPose1 = new Pose();
   debug = false;
   // @TODO move helpers to World
-  helperColor = new Color().setHex(Math.random() * 16777215);
+  helperColor = new Color$1().setHex(Math.random() * 16777215);
   helpers = {
     // c1: new ArrowHelper(),
     // c2: new ArrowHelper(),
@@ -33249,7 +37593,12 @@ class World {
   solver;
   constructor() {
     this.solver = new XPBDSolver();
+    Game.gui.physics.add(this.gravity, "x", -10, 10).step(0.1).name("Gravity x");
+    Game.gui.physics.add(this.gravity, "y", -10, 10).step(0.1).name("Gravity y");
+    Game.gui.physics.add(this.gravity, "z", -10, 10).step(0.1).name("Gravity z");
     Game.events.on(RayCastEvent, (e) => {
+      if (!this.#grabConstraint && !e.intersection)
+        return;
       this.#grabDistance = this.#grabConstraint ? this.#grabDistance : e.intersection.distance;
       const screenPos = new Vec3().copy(e.ray.origin).addScaledVector(Game.raycaster.ray.direction, this.#grabDistance);
       if (this.#grabConstraint) {
@@ -33258,7 +37607,7 @@ class World {
         if (!e.body)
           return;
         this.#grabDistance = e.intersection.distance;
-        const localPos = CoordinateSystem.worldToLocal(e.intersection.point, e.body.pose.q, e.body.pose.p);
+        const localPos = e.body.worldToLocal(e.intersection.point);
         this.#grabConstraint = new Attachment(localPos, screenPos).setBodies(e.body, null).setStiffness(e.body.mass * 500).setDamping(e.body.mass * 100, e.body.mass * 100);
         this.#constraintsFast.push(this.#grabConstraint);
       }
@@ -33284,6 +37633,7 @@ class World {
     this.#constraintsFast.push(...constraint.constraints);
   }
   update(dt) {
+    BaseSolver.ddIdx = 0;
     this.solver.update(this.#bodies, this.#constraintsFast, dt, this.gravity);
     if (this.#grabConstraint) {
       const F = this.#grabConstraint?.getForce(XPBDSolver.h).length().toFixed(2);
@@ -33389,9 +37739,10 @@ class BaseLightingScene extends Scene {
   constructor() {
     super();
     const ground = new Mesh(
-      new PlaneGeometry(100, 100),
+      new PlaneGeometry(50, 50, 5, 5),
       new MeshPhongMaterial({
-        color: 4473924
+        color: 4473924,
+        wireframe: true
       })
     );
     ground.receiveShadow = true;
@@ -33463,6 +37814,7 @@ class RigidBody {
   setPos(x, y, z) {
     this.pose.p.set(x, y, z);
     this.updateGeometry();
+    this.updateCollider();
     return this;
   }
   setStatic() {
@@ -33594,7 +37946,13 @@ class RigidBody {
     }
   }
   updateCollider() {
-    this.collider.updateRotation(this.pose.q);
+    this.collider.updateGlobalPose(this.pose);
+  }
+  localToWorld(v) {
+    return new Vec3().copy(v).applyQuaternion(this.pose.q).add(this.pose.p);
+  }
+  worldToLocal(v) {
+    return new Vec3().copy(v).sub(this.pose.p).applyQuaternion(this.pose.q.clone().conjugate());
   }
 }
 
@@ -33605,15 +37963,17 @@ function Box(width = 1, height, depth) {
     depth = width;
   const boxMesh = new Mesh(
     new BoxGeometry(width, height, depth),
-    new MeshPhongMaterial({
-      // color: 0xffffff,
-      // color: 0x00ffcc,
-      color: new Color().setHSL(0.5, 1, 0.5)
+    // new THREE.MeshPhongMaterial({
+    //     // color: 0xffffff,
+    //     // color: 0x00ffcc,
+    //     color: new THREE.Color().setHSL(0.5, 1, 0.5),
+    // }),
+    new MeshBasicMaterial({
+      color: 16777215,
+      // 0x00ffcc,
+      wireframe: true,
+      wireframeLinewidth: 2
     })
-    // new THREE.MeshBasicMaterial({
-    //     color: 0xffffff, // 0x00ffcc,
-    //     wireframe: true,
-    // })
   );
   const box = new RigidBody(
     new MeshCollider().setGeometry("box", width, height, depth)
@@ -33655,19 +38015,6 @@ class Constraint {
   // }
 }
 
-class AlignOrientation extends BaseConstraint {
-  solvePos(h) {
-    this.updateGlobalPoses();
-    const q = this.globalPose0.q;
-    q.conjugate();
-    q.multiplyQuaternions(this.globalPose1.q, q);
-    const omega = new Vec3(2 * q.x, 2 * q.y, 2 * q.z);
-    if (q.w < 0)
-      omega.set(-omega.x, -omega.y, -omega.z);
-    this.lambda = XPBDSolver.applyBodyPairCorrection(this.body0, this.body1, omega, this.compliance, h);
-  }
-}
-
 class AlignAxes extends BaseConstraint {
   solvePos(h) {
     this.updateGlobalPoses();
@@ -33681,12 +38028,11 @@ class AlignAxes extends BaseConstraint {
 }
 
 class MyScene extends BaseScene {
-  unitCube;
   constructor() {
     super();
   }
   init() {
-    const lookAt = new Vec3(0, 0.5, 0);
+    const lookAt = new Vec3(0, 0, 0);
     this.camera.lookAt(lookAt);
     this.orbitControls.target.copy(lookAt);
     this.orbitControls.update();
@@ -33695,25 +38041,22 @@ class MyScene extends BaseScene {
   }
   addGeometry() {
     let b0, b1;
-    b0 = Box(1).setPos(3, 3, 3);
+    b0 = Box(3, 1, 3).setPos(0, 0.5, 0);
     this.addBody(b0);
-    b0 = Box(2, 1, 0.05).setPos(3, 1.5, 1);
-    b1 = Box(2, 0.05, 1).setPos(3, 2, 0.5);
+    b0 = Box(1, 1, 2).setPos(0.1, 2, 0);
+    this.addBody(b0);
+    for (let i = 0; i < 6; i++) {
+      const h = 2;
+      const b = Box(h);
+      b.pose.p.set(-3, h - h / 2 + 0.05 + h * i, 0);
+      this.addBody(b);
+    }
+    b0 = Box(2, 1, 0.2).setPos(3, 1.5, 1);
+    b1 = Box(2, 0.2, 1).setPos(3, 2, 0.4);
     this.addBody(b0);
     this.addBody(b1);
     this.world.addConstraint(
-      new Constraint(b0, b1).add(new Attachment(new Vec3(0, 0, 0.5), new Vec3(0, 0.5, 0))).add(new AlignAxes())
-      // .add(new AlignOrientation)
-    );
-    b0 = Box(0.2, 0.2, 7).setPos(0, 2, 3);
-    b1 = Box(2, 1, 1).setPos(0, 2, 0.5);
-    this.addBody(b0);
-    this.addBody(b1);
-    this.world.addConstraint(
-      new Constraint(b0, b1).add(new Attachment(new Vec3(0.1, 0, 0.5), new Vec3(0, 0, -2))).add(new AlignOrientation())
-    );
-    this.world.addConstraint(
-      new Constraint(b0, b1).add(new Attachment(new Vec3(0.1, 0, -0.5), new Vec3(0, 0, -3)))
+      new Constraint(b0, b1).add(new Attachment(new Vec3(0, 0, 0.5), new Vec3(0, 0.6, 0))).add(new AlignAxes())
       // .add(new AlignOrientation)
     );
     this.addGround();
@@ -33722,7 +38065,7 @@ class MyScene extends BaseScene {
     if (keys.KeyQ) {
       const body = this.world.bodies[1];
       const tetraPointL = new Vec3(0, 0, 0.5);
-      const tetraPointW = CoordinateSystem.localToWorld(tetraPointL, body.pose.q, body.pose.p);
+      const tetraPointW = body.localToWorld(tetraPointL);
       const strength = 3;
       body.applyForceW(
         new Vec3(0, body.mass * this.world.gravity.y * -strength, 0),
@@ -33732,7 +38075,7 @@ class MyScene extends BaseScene {
     if (keys.KeyA) {
       const body = this.world.bodies[0];
       const tetraPointL = new Vec3(0, 0, 0);
-      const tetraPointW = CoordinateSystem.localToWorld(tetraPointL, body.pose.q, body.pose.p);
+      const tetraPointW = body.localToWorld(tetraPointL);
       const strength = 3;
       body.applyForceW(
         new Vec3(0, 0, body.mass * this.world.gravity.y * -strength),
