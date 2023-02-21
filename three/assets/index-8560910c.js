@@ -37643,7 +37643,7 @@ class GjkEpa {
 }
 
 class XPBDSolver extends BaseSolver {
-  numSubsteps = 20;
+  numSubsteps = 10;
   narrowPhase = new GjkEpa();
   static h = 0;
   collisionCount = 0;
