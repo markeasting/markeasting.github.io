@@ -29426,6 +29426,309 @@ class CylinderGeometry extends BufferGeometry {
 
 }
 
+class PolyhedronGeometry extends BufferGeometry {
+
+	constructor( vertices = [], indices = [], radius = 1, detail = 0 ) {
+
+		super();
+
+		this.type = 'PolyhedronGeometry';
+
+		this.parameters = {
+			vertices: vertices,
+			indices: indices,
+			radius: radius,
+			detail: detail
+		};
+
+		// default buffer data
+
+		const vertexBuffer = [];
+		const uvBuffer = [];
+
+		// the subdivision creates the vertex buffer data
+
+		subdivide( detail );
+
+		// all vertices should lie on a conceptual sphere with a given radius
+
+		applyRadius( radius );
+
+		// finally, create the uv data
+
+		generateUVs();
+
+		// build non-indexed geometry
+
+		this.setAttribute( 'position', new Float32BufferAttribute( vertexBuffer, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( vertexBuffer.slice(), 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvBuffer, 2 ) );
+
+		if ( detail === 0 ) {
+
+			this.computeVertexNormals(); // flat normals
+
+		} else {
+
+			this.normalizeNormals(); // smooth normals
+
+		}
+
+		// helper functions
+
+		function subdivide( detail ) {
+
+			const a = new Vector3();
+			const b = new Vector3();
+			const c = new Vector3();
+
+			// iterate over all faces and apply a subdivision with the given detail value
+
+			for ( let i = 0; i < indices.length; i += 3 ) {
+
+				// get the vertices of the face
+
+				getVertexByIndex( indices[ i + 0 ], a );
+				getVertexByIndex( indices[ i + 1 ], b );
+				getVertexByIndex( indices[ i + 2 ], c );
+
+				// perform subdivision
+
+				subdivideFace( a, b, c, detail );
+
+			}
+
+		}
+
+		function subdivideFace( a, b, c, detail ) {
+
+			const cols = detail + 1;
+
+			// we use this multidimensional array as a data structure for creating the subdivision
+
+			const v = [];
+
+			// construct all of the vertices for this subdivision
+
+			for ( let i = 0; i <= cols; i ++ ) {
+
+				v[ i ] = [];
+
+				const aj = a.clone().lerp( c, i / cols );
+				const bj = b.clone().lerp( c, i / cols );
+
+				const rows = cols - i;
+
+				for ( let j = 0; j <= rows; j ++ ) {
+
+					if ( j === 0 && i === cols ) {
+
+						v[ i ][ j ] = aj;
+
+					} else {
+
+						v[ i ][ j ] = aj.clone().lerp( bj, j / rows );
+
+					}
+
+				}
+
+			}
+
+			// construct all of the faces
+
+			for ( let i = 0; i < cols; i ++ ) {
+
+				for ( let j = 0; j < 2 * ( cols - i ) - 1; j ++ ) {
+
+					const k = Math.floor( j / 2 );
+
+					if ( j % 2 === 0 ) {
+
+						pushVertex( v[ i ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k ] );
+						pushVertex( v[ i ][ k ] );
+
+					} else {
+
+						pushVertex( v[ i ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k + 1 ] );
+						pushVertex( v[ i + 1 ][ k ] );
+
+					}
+
+				}
+
+			}
+
+		}
+
+		function applyRadius( radius ) {
+
+			const vertex = new Vector3();
+
+			// iterate over the entire buffer and apply the radius to each vertex
+
+			for ( let i = 0; i < vertexBuffer.length; i += 3 ) {
+
+				vertex.x = vertexBuffer[ i + 0 ];
+				vertex.y = vertexBuffer[ i + 1 ];
+				vertex.z = vertexBuffer[ i + 2 ];
+
+				vertex.normalize().multiplyScalar( radius );
+
+				vertexBuffer[ i + 0 ] = vertex.x;
+				vertexBuffer[ i + 1 ] = vertex.y;
+				vertexBuffer[ i + 2 ] = vertex.z;
+
+			}
+
+		}
+
+		function generateUVs() {
+
+			const vertex = new Vector3();
+
+			for ( let i = 0; i < vertexBuffer.length; i += 3 ) {
+
+				vertex.x = vertexBuffer[ i + 0 ];
+				vertex.y = vertexBuffer[ i + 1 ];
+				vertex.z = vertexBuffer[ i + 2 ];
+
+				const u = azimuth( vertex ) / 2 / Math.PI + 0.5;
+				const v = inclination( vertex ) / Math.PI + 0.5;
+				uvBuffer.push( u, 1 - v );
+
+			}
+
+			correctUVs();
+
+			correctSeam();
+
+		}
+
+		function correctSeam() {
+
+			// handle case when face straddles the seam, see #3269
+
+			for ( let i = 0; i < uvBuffer.length; i += 6 ) {
+
+				// uv data of a single face
+
+				const x0 = uvBuffer[ i + 0 ];
+				const x1 = uvBuffer[ i + 2 ];
+				const x2 = uvBuffer[ i + 4 ];
+
+				const max = Math.max( x0, x1, x2 );
+				const min = Math.min( x0, x1, x2 );
+
+				// 0.9 is somewhat arbitrary
+
+				if ( max > 0.9 && min < 0.1 ) {
+
+					if ( x0 < 0.2 ) uvBuffer[ i + 0 ] += 1;
+					if ( x1 < 0.2 ) uvBuffer[ i + 2 ] += 1;
+					if ( x2 < 0.2 ) uvBuffer[ i + 4 ] += 1;
+
+				}
+
+			}
+
+		}
+
+		function pushVertex( vertex ) {
+
+			vertexBuffer.push( vertex.x, vertex.y, vertex.z );
+
+		}
+
+		function getVertexByIndex( index, vertex ) {
+
+			const stride = index * 3;
+
+			vertex.x = vertices[ stride + 0 ];
+			vertex.y = vertices[ stride + 1 ];
+			vertex.z = vertices[ stride + 2 ];
+
+		}
+
+		function correctUVs() {
+
+			const a = new Vector3();
+			const b = new Vector3();
+			const c = new Vector3();
+
+			const centroid = new Vector3();
+
+			const uvA = new Vector2();
+			const uvB = new Vector2();
+			const uvC = new Vector2();
+
+			for ( let i = 0, j = 0; i < vertexBuffer.length; i += 9, j += 6 ) {
+
+				a.set( vertexBuffer[ i + 0 ], vertexBuffer[ i + 1 ], vertexBuffer[ i + 2 ] );
+				b.set( vertexBuffer[ i + 3 ], vertexBuffer[ i + 4 ], vertexBuffer[ i + 5 ] );
+				c.set( vertexBuffer[ i + 6 ], vertexBuffer[ i + 7 ], vertexBuffer[ i + 8 ] );
+
+				uvA.set( uvBuffer[ j + 0 ], uvBuffer[ j + 1 ] );
+				uvB.set( uvBuffer[ j + 2 ], uvBuffer[ j + 3 ] );
+				uvC.set( uvBuffer[ j + 4 ], uvBuffer[ j + 5 ] );
+
+				centroid.copy( a ).add( b ).add( c ).divideScalar( 3 );
+
+				const azi = azimuth( centroid );
+
+				correctUV( uvA, j + 0, a, azi );
+				correctUV( uvB, j + 2, b, azi );
+				correctUV( uvC, j + 4, c, azi );
+
+			}
+
+		}
+
+		function correctUV( uv, stride, vector, azimuth ) {
+
+			if ( ( azimuth < 0 ) && ( uv.x === 1 ) ) {
+
+				uvBuffer[ stride ] = uv.x - 1;
+
+			}
+
+			if ( ( vector.x === 0 ) && ( vector.z === 0 ) ) {
+
+				uvBuffer[ stride ] = azimuth / 2 / Math.PI + 0.5;
+
+			}
+
+		}
+
+		// Angle around the Y axis, counter-clockwise when looking from above.
+
+		function azimuth( vector ) {
+
+			return Math.atan2( vector.z, - vector.x );
+
+		}
+
+
+		// Angle above the XZ plane.
+
+		function inclination( vector ) {
+
+			return Math.atan2( - vector.y, Math.sqrt( ( vector.x * vector.x ) + ( vector.z * vector.z ) ) );
+
+		}
+
+	}
+
+	static fromJSON( data ) {
+
+		return new PolyhedronGeometry( data.vertices, data.indices, data.radius, data.details );
+
+	}
+
+}
+
 class SphereGeometry extends BufferGeometry {
 
 	constructor( radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI ) {
@@ -29543,6 +29846,189 @@ class SphereGeometry extends BufferGeometry {
 	static fromJSON( data ) {
 
 		return new SphereGeometry( data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength );
+
+	}
+
+}
+
+class TetrahedronGeometry extends PolyhedronGeometry {
+
+	constructor( radius = 1, detail = 0 ) {
+
+		const vertices = [
+			1, 1, 1, 	- 1, - 1, 1, 	- 1, 1, - 1, 	1, - 1, - 1
+		];
+
+		const indices = [
+			2, 1, 0, 	0, 3, 2,	1, 3, 0,	2, 3, 1
+		];
+
+		super( vertices, indices, radius, detail );
+
+		this.type = 'TetrahedronGeometry';
+
+		this.parameters = {
+			radius: radius,
+			detail: detail
+		};
+
+	}
+
+	static fromJSON( data ) {
+
+		return new TetrahedronGeometry( data.radius, data.detail );
+
+	}
+
+}
+
+class TorusKnotGeometry extends BufferGeometry {
+
+	constructor( radius = 1, tube = 0.4, tubularSegments = 64, radialSegments = 8, p = 2, q = 3 ) {
+
+		super();
+
+		this.type = 'TorusKnotGeometry';
+
+		this.parameters = {
+			radius: radius,
+			tube: tube,
+			tubularSegments: tubularSegments,
+			radialSegments: radialSegments,
+			p: p,
+			q: q
+		};
+
+		tubularSegments = Math.floor( tubularSegments );
+		radialSegments = Math.floor( radialSegments );
+
+		// buffers
+
+		const indices = [];
+		const vertices = [];
+		const normals = [];
+		const uvs = [];
+
+		// helper variables
+
+		const vertex = new Vector3();
+		const normal = new Vector3();
+
+		const P1 = new Vector3();
+		const P2 = new Vector3();
+
+		const B = new Vector3();
+		const T = new Vector3();
+		const N = new Vector3();
+
+		// generate vertices, normals and uvs
+
+		for ( let i = 0; i <= tubularSegments; ++ i ) {
+
+			// the radian "u" is used to calculate the position on the torus curve of the current tubular segment
+
+			const u = i / tubularSegments * p * Math.PI * 2;
+
+			// now we calculate two points. P1 is our current position on the curve, P2 is a little farther ahead.
+			// these points are used to create a special "coordinate space", which is necessary to calculate the correct vertex positions
+
+			calculatePositionOnCurve( u, p, q, radius, P1 );
+			calculatePositionOnCurve( u + 0.01, p, q, radius, P2 );
+
+			// calculate orthonormal basis
+
+			T.subVectors( P2, P1 );
+			N.addVectors( P2, P1 );
+			B.crossVectors( T, N );
+			N.crossVectors( B, T );
+
+			// normalize B, N. T can be ignored, we don't use it
+
+			B.normalize();
+			N.normalize();
+
+			for ( let j = 0; j <= radialSegments; ++ j ) {
+
+				// now calculate the vertices. they are nothing more than an extrusion of the torus curve.
+				// because we extrude a shape in the xy-plane, there is no need to calculate a z-value.
+
+				const v = j / radialSegments * Math.PI * 2;
+				const cx = - tube * Math.cos( v );
+				const cy = tube * Math.sin( v );
+
+				// now calculate the final vertex position.
+				// first we orient the extrusion with our basis vectors, then we add it to the current position on the curve
+
+				vertex.x = P1.x + ( cx * N.x + cy * B.x );
+				vertex.y = P1.y + ( cx * N.y + cy * B.y );
+				vertex.z = P1.z + ( cx * N.z + cy * B.z );
+
+				vertices.push( vertex.x, vertex.y, vertex.z );
+
+				// normal (P1 is always the center/origin of the extrusion, thus we can use it to calculate the normal)
+
+				normal.subVectors( vertex, P1 ).normalize();
+
+				normals.push( normal.x, normal.y, normal.z );
+
+				// uv
+
+				uvs.push( i / tubularSegments );
+				uvs.push( j / radialSegments );
+
+			}
+
+		}
+
+		// generate indices
+
+		for ( let j = 1; j <= tubularSegments; j ++ ) {
+
+			for ( let i = 1; i <= radialSegments; i ++ ) {
+
+				// indices
+
+				const a = ( radialSegments + 1 ) * ( j - 1 ) + ( i - 1 );
+				const b = ( radialSegments + 1 ) * j + ( i - 1 );
+				const c = ( radialSegments + 1 ) * j + i;
+				const d = ( radialSegments + 1 ) * ( j - 1 ) + i;
+
+				// faces
+
+				indices.push( a, b, d );
+				indices.push( b, c, d );
+
+			}
+
+		}
+
+		// build geometry
+
+		this.setIndex( indices );
+		this.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
+		this.setAttribute( 'normal', new Float32BufferAttribute( normals, 3 ) );
+		this.setAttribute( 'uv', new Float32BufferAttribute( uvs, 2 ) );
+
+		// this function calculates the current position on the torus curve
+
+		function calculatePositionOnCurve( u, p, q, radius, position ) {
+
+			const cu = Math.cos( u );
+			const su = Math.sin( u );
+			const quOverP = q / p * u;
+			const cs = Math.cos( quOverP );
+
+			position.x = radius * ( 2 + cs ) * 0.5 * cu;
+			position.y = radius * ( 2 + cs ) * su * 0.5;
+			position.z = radius * Math.sin( quOverP ) * 0.5;
+
+		}
+
+	}
+
+	static fromJSON( data ) {
+
+		return new TorusKnotGeometry( data.radius, data.tube, data.tubularSegments, data.radialSegments, data.p, data.q );
 
 	}
 
@@ -33718,7 +34204,6 @@ class Game {
     window.addEventListener("mousemove", this.onMouse.bind(this));
     window.addEventListener("mouseup", this.onMouse.bind(this));
     Game.gui.physics.add(Game, "stepPhysics").name("Step physics");
-    Game.gui.debug.add(Game, "debugOverlay").name("Enable overlay");
   }
   setupRenderPass() {
     return;
@@ -33746,8 +34231,7 @@ class Game {
       Game.scene.updatePhysics(this.dt, !Game.stepPhysics);
       Game.scene.update(time, this.dt, Game.keys);
       Game.renderer.render(Game.scene.scene, Game.scene.camera);
-      if (Game.debugOverlay)
-        Game.scene.world.draw(Game.renderer, Game.scene.camera);
+      Game.scene.world.draw(Game.renderer, Game.scene.camera);
     }
   }
   onMouse(e) {
@@ -33771,8 +34255,7 @@ class Game {
       return;
     Game.raycaster.setFromCamera(Game.pointer, scene.camera);
     const hits = Game.raycaster.intersectObjects(scene.scene.children);
-    Game.raycaster;
-    const item = hits[0];
+    const item = hits.filter((m) => m.object.userData.physicsBody)[0];
     Game.events.emit(new RayCastEvent({
       type,
       ray: Game.raycaster.ray,
@@ -35147,252 +35630,6 @@ class ContactSet {
   }
 }
 
-var ColliderType = /* @__PURE__ */ ((ColliderType2) => {
-  ColliderType2[ColliderType2["Box"] = 0] = "Box";
-  ColliderType2[ColliderType2["Plane"] = 1] = "Plane";
-  ColliderType2[ColliderType2["Sphere"] = 2] = "Sphere";
-  ColliderType2[ColliderType2["ConvexMesh"] = 3] = "ConvexMesh";
-  return ColliderType2;
-})(ColliderType || {});
-class Collider {
-  colliderType = 2 /* Sphere */;
-  vertices = [];
-  verticesWorldSpace = [];
-  indices = [];
-  uniqueIndices = [];
-  // relativePos: Vec3 = new Vec3(0.0, 0.0, 0.0);
-  aabb = new Box3();
-  aabbHelper = new Box3Helper(this.aabb);
-  updateGlobalPose(pose) {
-  }
-  /* GJK */
-  findFurthestPoint(dir) {
-    return new Vec3();
-  }
-}
-class PlaneCollider extends Collider {
-  colliderType = 1 /* Plane */;
-  size = new Vector2(1, 1);
-  normal = new Vec3(0, 1, 0);
-  normalRef = new Vec3(0, 1, 0);
-  plane = new Plane(new Vec3(0, 1, 0));
-  /**
-   * @TODO plane distance / constant
-   */
-  constructor(size, normal) {
-    super();
-    this.size = size;
-    if (normal) {
-      this.normal = normal.normalize();
-      this.plane = new Plane(normal);
-    }
-  }
-  updateGlobalPose(pose) {
-  }
-}
-class MeshCollider extends Collider {
-  colliderType = 3 /* ConvexMesh */;
-  // override setGeometry(geometry: THREE.BufferGeometry): this {
-  setGeometry(whichOne, width = 1, height = 1, depth = 1) {
-    if (whichOne == "point") {
-      this.vertices = [new Vec3(0, 0, 0)];
-      this.indices = [0];
-      this.uniqueIndices = [0];
-    }
-    if (whichOne == "box") {
-      this.vertices = [
-        new Vec3(-width / 2, -height / 2, -depth / 2),
-        // bottom left back corner
-        new Vec3(width / 2, -height / 2, -depth / 2),
-        // bottom right back corner
-        new Vec3(width / 2, height / 2, -depth / 2),
-        // top right back corner
-        new Vec3(-width / 2, height / 2, -depth / 2),
-        // top left back corner
-        new Vec3(-width / 2, -height / 2, depth / 2),
-        // bottom left front corner
-        new Vec3(width / 2, -height / 2, depth / 2),
-        // bottom right front corner
-        new Vec3(width / 2, height / 2, depth / 2),
-        // top right front corner
-        new Vec3(-width / 2, height / 2, depth / 2)
-        // top left front corner
-      ];
-      this.indices = [
-        0,
-        1,
-        2,
-        // back face
-        2,
-        3,
-        0,
-        1,
-        5,
-        6,
-        // right face
-        6,
-        2,
-        1,
-        5,
-        4,
-        7,
-        // front face
-        7,
-        6,
-        5,
-        4,
-        0,
-        3,
-        // left face
-        3,
-        7,
-        4,
-        3,
-        2,
-        6,
-        // top face
-        6,
-        7,
-        3,
-        0,
-        4,
-        5,
-        // bottom face
-        5,
-        1,
-        0
-      ];
-      this.uniqueIndices = [0, 1, 2, 3, 4, 5, 6, 7];
-    }
-    if (whichOne == "tetra") {
-      const size = width;
-      const sqrt8over9 = 0.9428090415820634 * size;
-      const sqrt2over9 = 0.4714045207910317 * size;
-      const sqrt2over3 = 0.816496580927726 * size;
-      const oneThird = 0.3333333333333333 * size;
-      this.vertices = [
-        new Vec3(0, -oneThird, sqrt8over9),
-        new Vec3(sqrt2over3, -oneThird, -sqrt2over9),
-        new Vec3(-sqrt2over3, -oneThird, -sqrt2over9),
-        new Vec3(0, size, 0)
-      ];
-      this.uniqueIndices = [
-        2,
-        1,
-        0,
-        1,
-        2,
-        3,
-        0,
-        3,
-        2,
-        1,
-        3,
-        0
-      ];
-    }
-    for (let i = 0; i < this.vertices.length; i++) {
-      this.verticesWorldSpace[i] = this.vertices[i].clone();
-    }
-    return this;
-  }
-  updateGlobalPose(pose) {
-    const min = new Vec3(Infinity, Infinity, Infinity);
-    const max = new Vec3(-Infinity, -Infinity, -Infinity);
-    for (let i = 0; i < this.vertices.length; i++) {
-      const v = this.vertices[i];
-      this.verticesWorldSpace[i].copy(v).applyQuaternion(pose.q).add(pose.p);
-      min.min(this.verticesWorldSpace[i]);
-      max.max(this.verticesWorldSpace[i]);
-    }
-    this.aabb.set(min, max);
-  }
-  /* GJK */
-  findFurthestPoint(dir) {
-    const maxPoint = new Vec3();
-    let maxDist = -Infinity;
-    for (const vertex of this.verticesWorldSpace) {
-      const distance = vertex.dot(dir);
-      if (distance > maxDist) {
-        maxDist = distance;
-        maxPoint.copy(vertex);
-      }
-    }
-    return maxPoint;
-  }
-}
-
-class BaseSolver {
-  debugContacts = false;
-  // @TODO move helpers to World
-  helpers = {
-    n: new ArrowHelper(),
-    d: new ArrowHelper(),
-    r1: new ArrowHelper(),
-    r2: new ArrowHelper(),
-    A: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
-    B: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
-    p1: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16776960)),
-    p2: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16711935))
-  };
-  static ddIdx = 0;
-  constructor() {
-    Game.gui.debug.add(this, "debugContacts").name("Debug contacts");
-    for (const h in this.helpers) {
-      World.scene.add(this.helpers[h]);
-    }
-    this.helpers.n.setColor(65535);
-    this.helpers.d.setColor(16711680);
-    this.helpers.r2.setColor(16711935);
-  }
-  dd(vec, pos) {
-    this.setDebugVector("_debug" + BaseSolver.ddIdx, vec, pos);
-    BaseSolver.ddIdx++;
-  }
-  setDebugVector(key, vec, pos = new Vec3(0, 0, 0)) {
-    if (!Game.debugOverlay)
-      return;
-    if (!this.helpers[key]) {
-      const arrow2 = new ArrowHelper();
-      arrow2.setColor(new Color$1().setHex(Math.random() * 16777215));
-      this.helpers[key] = arrow2;
-      World.scene.add(arrow2);
-    }
-    const arrow = this.helpers[key];
-    if (pos)
-      arrow.position.copy(pos);
-    arrow.setDirection(vec.clone().normalize());
-    arrow.setLength(vec.length());
-  }
-  setDebugPoint(key, pos, size = 0.1) {
-    if (!Game.debugOverlay)
-      return;
-    const box = this.helpers[key];
-    box.box = new Box3().setFromCenterAndSize(pos, new Vec3(size, size, size));
-  }
-  debugContact(contact) {
-    if (!Game.debugOverlay || !this.debugContacts)
-      return;
-    for (const key in contact) {
-      this.setDebugPoint("A", contact.A.pose.p, 0.02);
-      this.setDebugPoint("B", contact.B.pose.p, 0.02);
-      if (key == "n")
-        this.setDebugVector(key, contact.n, contact.p2);
-      if (key == "d")
-        this.setDebugVector(key, contact.n.clone().multiplyScalar(contact.d), contact.p1);
-      if (key == "r1")
-        this.setDebugVector(key, contact.A.localToWorld(contact.r1).sub(contact.A.pose.p), contact.A.pose.p);
-      if (key == "r2")
-        this.setDebugVector(key, contact.B.localToWorld(contact.r2).sub(contact.B.pose.p), contact.B.pose.p);
-      if (key == "p1")
-        this.setDebugPoint(key, contact.p1);
-      if (key == "p2")
-        this.setDebugPoint(key, contact.p2);
-    }
-  }
-  // public update(bodies: Array<RigidBody>, constraints: Array<Constraint>, dt: number, gravity: Vec3): void {}
-}
-
 /**
  * Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
  */
@@ -36702,6 +36939,340 @@ class ConvexGeometry extends BufferGeometry {
 
 }
 
+/**
+ * @param {BufferGeometry} geometry
+ * @param {number} tolerance
+ * @return {BufferGeometry}
+ */
+function mergeVertices( geometry, tolerance = 1e-4 ) {
+
+	tolerance = Math.max( tolerance, Number.EPSILON );
+
+	// Generate an index buffer if the geometry doesn't have one, or optimize it
+	// if it's already available.
+	const hashToIndex = {};
+	const indices = geometry.getIndex();
+	const positions = geometry.getAttribute( 'position' );
+	const vertexCount = indices ? indices.count : positions.count;
+
+	// next value for triangle indices
+	let nextIndex = 0;
+
+	// attributes and new attribute arrays
+	const attributeNames = Object.keys( geometry.attributes );
+	const tmpAttributes = {};
+	const tmpMorphAttributes = {};
+	const newIndices = [];
+	const getters = [ 'getX', 'getY', 'getZ', 'getW' ];
+	const setters = [ 'setX', 'setY', 'setZ', 'setW' ];
+
+	// Initialize the arrays, allocating space conservatively. Extra
+	// space will be trimmed in the last step.
+	for ( let i = 0, l = attributeNames.length; i < l; i ++ ) {
+
+		const name = attributeNames[ i ];
+		const attr = geometry.attributes[ name ];
+
+		tmpAttributes[ name ] = new BufferAttribute(
+			new attr.array.constructor( attr.count * attr.itemSize ),
+			attr.itemSize,
+			attr.normalized
+		);
+
+		const morphAttr = geometry.morphAttributes[ name ];
+		if ( morphAttr ) {
+
+			tmpMorphAttributes[ name ] = new BufferAttribute(
+				new morphAttr.array.constructor( morphAttr.count * morphAttr.itemSize ),
+				morphAttr.itemSize,
+				morphAttr.normalized
+			);
+
+		}
+
+	}
+
+	// convert the error tolerance to an amount of decimal places to truncate to
+	const decimalShift = Math.log10( 1 / tolerance );
+	const shiftMultiplier = Math.pow( 10, decimalShift );
+	for ( let i = 0; i < vertexCount; i ++ ) {
+
+		const index = indices ? indices.getX( i ) : i;
+
+		// Generate a hash for the vertex attributes at the current index 'i'
+		let hash = '';
+		for ( let j = 0, l = attributeNames.length; j < l; j ++ ) {
+
+			const name = attributeNames[ j ];
+			const attribute = geometry.getAttribute( name );
+			const itemSize = attribute.itemSize;
+
+			for ( let k = 0; k < itemSize; k ++ ) {
+
+				// double tilde truncates the decimal value
+				hash += `${ ~ ~ ( attribute[ getters[ k ] ]( index ) * shiftMultiplier ) },`;
+
+			}
+
+		}
+
+		// Add another reference to the vertex if it's already
+		// used by another index
+		if ( hash in hashToIndex ) {
+
+			newIndices.push( hashToIndex[ hash ] );
+
+		} else {
+
+			// copy data to the new index in the temporary attributes
+			for ( let j = 0, l = attributeNames.length; j < l; j ++ ) {
+
+				const name = attributeNames[ j ];
+				const attribute = geometry.getAttribute( name );
+				const morphAttr = geometry.morphAttributes[ name ];
+				const itemSize = attribute.itemSize;
+				const newarray = tmpAttributes[ name ];
+				const newMorphArrays = tmpMorphAttributes[ name ];
+
+				for ( let k = 0; k < itemSize; k ++ ) {
+
+					const getterFunc = getters[ k ];
+					const setterFunc = setters[ k ];
+					newarray[ setterFunc ]( nextIndex, attribute[ getterFunc ]( index ) );
+
+					if ( morphAttr ) {
+
+						for ( let m = 0, ml = morphAttr.length; m < ml; m ++ ) {
+
+							newMorphArrays[ m ][ setterFunc ]( nextIndex, morphAttr[ m ][ getterFunc ]( index ) );
+
+						}
+
+					}
+
+				}
+
+			}
+
+			hashToIndex[ hash ] = nextIndex;
+			newIndices.push( nextIndex );
+			nextIndex ++;
+
+		}
+
+	}
+
+	// generate result BufferGeometry
+	const result = geometry.clone();
+	for ( const name in geometry.attributes ) {
+
+		const tmpAttribute = tmpAttributes[ name ];
+
+		result.setAttribute( name, new BufferAttribute(
+			tmpAttribute.array.slice( 0, nextIndex * tmpAttribute.itemSize ),
+			tmpAttribute.itemSize,
+			tmpAttribute.normalized,
+		) );
+
+		if ( ! ( name in tmpMorphAttributes ) ) continue;
+
+		for ( let j = 0; j < tmpMorphAttributes[ name ].length; j ++ ) {
+
+			const tmpMorphAttribute = tmpMorphAttributes[ name ][ j ];
+
+			result.morphAttributes[ name ][ j ] = new BufferAttribute(
+				tmpMorphAttribute.array.slice( 0, nextIndex * tmpMorphAttribute.itemSize ),
+				tmpMorphAttribute.itemSize,
+				tmpMorphAttribute.normalized,
+			);
+
+		}
+
+	}
+
+	// indices
+
+	result.setIndex( newIndices );
+
+	return result;
+
+}
+
+var ColliderType = /* @__PURE__ */ ((ColliderType2) => {
+  ColliderType2[ColliderType2["Box"] = 0] = "Box";
+  ColliderType2[ColliderType2["Plane"] = 1] = "Plane";
+  ColliderType2[ColliderType2["Sphere"] = 2] = "Sphere";
+  ColliderType2[ColliderType2["ConvexMesh"] = 3] = "ConvexMesh";
+  return ColliderType2;
+})(ColliderType || {});
+class Collider {
+  colliderType = 2 /* Sphere */;
+  vertices = [];
+  verticesWorldSpace = [];
+  indices = [];
+  uniqueIndices = [];
+  // relativePos: Vec3 = new Vec3(0.0, 0.0, 0.0);
+  aabb = new Box3();
+  aabbHelper = new Box3Helper(this.aabb);
+  updateGlobalPose(pose) {
+  }
+  /* GJK */
+  findFurthestPoint(dir) {
+    return new Vec3();
+  }
+}
+class PlaneCollider extends Collider {
+  colliderType = 1 /* Plane */;
+  size = new Vector2(1, 1);
+  normal = new Vec3(0, 1, 0);
+  normalRef = new Vec3(0, 1, 0);
+  plane = new Plane(new Vec3(0, 1, 0));
+  /**
+   * @TODO plane distance / constant
+   */
+  constructor(size, normal) {
+    super();
+    this.size = size;
+    if (normal) {
+      this.normal = normal.normalize();
+      this.plane = new Plane(normal);
+    }
+  }
+  updateGlobalPose(pose) {
+  }
+}
+class MeshCollider extends Collider {
+  colliderType = 3 /* ConvexMesh */;
+  convexHull;
+  setGeometry(geometry) {
+    let strippedGeometry = geometry.clone().deleteAttribute("normal").deleteAttribute("uv");
+    strippedGeometry = mergeVertices(strippedGeometry);
+    const vertices = [];
+    const positionAttribute = geometry.getAttribute("position");
+    for (let i = 0; i < positionAttribute.count; i++) {
+      const vertex = new Vec3();
+      vertex.fromBufferAttribute(positionAttribute, i);
+      vertices.push(vertex);
+    }
+    const convexHull = new ConvexGeometry(vertices);
+    const hullPositionAttribute = convexHull.getAttribute("position");
+    this.convexHull = new Mesh(
+      convexHull,
+      new MeshBasicMaterial({
+        color: 43690,
+        wireframe: true,
+        wireframeLinewidth: 1
+      })
+    );
+    for (let i = 0; i < hullPositionAttribute.count; i++) {
+      const vertex = new Vec3();
+      vertex.fromBufferAttribute(hullPositionAttribute, i);
+      this.vertices.push(vertex);
+      this.indices.push(i);
+      this.uniqueIndices.push(i);
+    }
+    for (let i = 0; i < this.vertices.length; i++) {
+      this.verticesWorldSpace[i] = this.vertices[i].clone();
+    }
+    return this;
+  }
+  updateGlobalPose(pose) {
+    const min = new Vec3(Infinity, Infinity, Infinity);
+    const max = new Vec3(-Infinity, -Infinity, -Infinity);
+    for (let i = 0; i < this.vertices.length; i++) {
+      const v = this.vertices[i];
+      this.verticesWorldSpace[i].copy(v).applyQuaternion(pose.q).add(pose.p);
+      min.min(this.verticesWorldSpace[i]);
+      max.max(this.verticesWorldSpace[i]);
+    }
+    this.aabb.set(min, max);
+  }
+  /* GJK */
+  findFurthestPoint(dir) {
+    const maxPoint = new Vec3();
+    let maxDist = -Infinity;
+    for (const vertex of this.verticesWorldSpace) {
+      const distance = vertex.dot(dir);
+      if (distance > maxDist) {
+        maxDist = distance;
+        maxPoint.copy(vertex);
+      }
+    }
+    return maxPoint;
+  }
+}
+
+class BaseSolver {
+  debugContacts = false;
+  // @TODO move helpers to World
+  helpers = {
+    n: new ArrowHelper(),
+    d: new ArrowHelper(),
+    r1: new ArrowHelper(),
+    r2: new ArrowHelper(),
+    A: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
+    B: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(13421772)),
+    p1: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16776960)),
+    p2: new Box3Helper(new Box3(new Vec3(0), new Vec3(0)), new Color$1(16711935))
+  };
+  static ddIdx = 0;
+  constructor() {
+    Game.gui.debug.add(this, "debugContacts").name("Debug contacts");
+    for (const h in this.helpers) {
+      World.debugOverlays.add(this.helpers[h]);
+    }
+    this.helpers.n.setColor(65535);
+    this.helpers.d.setColor(16711680);
+    this.helpers.r2.setColor(16711935);
+  }
+  dd(vec, pos) {
+    this.setDebugVector("_debug" + BaseSolver.ddIdx, vec, pos);
+    BaseSolver.ddIdx++;
+  }
+  setDebugVector(key, vec, pos = new Vec3(0, 0, 0)) {
+    if (!Game.debugOverlay)
+      return;
+    if (!this.helpers[key]) {
+      const arrow2 = new ArrowHelper();
+      arrow2.setColor(new Color$1().setHex(Math.random() * 16777215));
+      this.helpers[key] = arrow2;
+      World.debugOverlays.add(arrow2);
+    }
+    const arrow = this.helpers[key];
+    if (pos)
+      arrow.position.copy(pos);
+    arrow.setDirection(vec.clone().normalize());
+    arrow.setLength(vec.length());
+  }
+  setDebugPoint(key, pos, size = 0.1) {
+    if (!Game.debugOverlay)
+      return;
+    const box = this.helpers[key];
+    box.box = new Box3().setFromCenterAndSize(pos, new Vec3(size, size, size));
+  }
+  debugContact(contact) {
+    if (!Game.debugOverlay || !this.debugContacts)
+      return;
+    for (const key in contact) {
+      this.setDebugPoint("A", contact.A.pose.p, 0.02);
+      this.setDebugPoint("B", contact.B.pose.p, 0.02);
+      if (key == "n")
+        this.setDebugVector(key, contact.n, contact.p2);
+      if (key == "d")
+        this.setDebugVector(key, contact.n.clone().multiplyScalar(contact.d), contact.p1);
+      if (key == "r1")
+        this.setDebugVector(key, contact.A.localToWorld(contact.r1).sub(contact.A.pose.p), contact.A.pose.p);
+      if (key == "r2")
+        this.setDebugVector(key, contact.B.localToWorld(contact.r2).sub(contact.B.pose.p), contact.B.pose.p);
+      if (key == "p1")
+        this.setDebugPoint(key, contact.p1);
+      if (key == "p2")
+        this.setDebugPoint(key, contact.p2);
+    }
+  }
+  // public update(bodies: Array<RigidBody>, constraints: Array<Constraint>, dt: number, gravity: Vec3): void {}
+}
+
 class Simplex {
   points = [];
   size = 0;
@@ -36744,13 +37315,13 @@ class GjkEpa {
   debugNormal = new ArrowHelper();
   debug = false;
   constructor() {
-    Game.gui.debug.add(this, "debug").name("Debug GJK / EPA");
+    Game.gui.solver.add(this, "debug").name("Debug GJK / EPA");
   }
   GJK(colliderA, colliderB) {
     const support = this.support(colliderA, colliderB, new Vec3(0, 1, 0));
     const simplex = new Simplex();
     simplex.push_front(support);
-    const direction = support.point.clone().multiplyScalar(-1);
+    const direction = support.point.clone().negate();
     while (true) {
       const support2 = this.support(colliderA, colliderB, direction);
       if (support2.point.dot(direction) <= 0)
@@ -36766,7 +37337,7 @@ class GjkEpa {
    */
   support(colliderA, colliderB, direction) {
     const witnessA = colliderA.findFurthestPoint(direction);
-    const witnessB = colliderB.findFurthestPoint(direction.clone().multiplyScalar(-1));
+    const witnessB = colliderB.findFurthestPoint(direction.clone().negate());
     return new Support(witnessA, witnessB);
   }
   nextSimplex(simplex, direction) {
@@ -36787,7 +37358,7 @@ class GjkEpa {
     const a = simplex.points[0];
     const b = simplex.points[1];
     const ab = new Vec3().subVectors(b.point, a.point);
-    const ao = a.point.clone().multiplyScalar(-1);
+    const ao = a.point.clone().negate();
     if (this.sameDirection(ab, ao)) {
       direction.copy(ab.clone().cross(ao).clone().cross(ab));
     } else {
@@ -36802,7 +37373,7 @@ class GjkEpa {
     const c = simplex.points[2];
     const ab = new Vec3().subVectors(b.point, a.point);
     const ac = new Vec3().subVectors(c.point, a.point);
-    const ao = a.point.clone().multiplyScalar(-1);
+    const ao = a.point.clone().negate();
     const abc = ab.clone().cross(ac);
     if (this.sameDirection(abc.clone().cross(ac), ao)) {
       if (this.sameDirection(ac, ao)) {
@@ -36821,7 +37392,7 @@ class GjkEpa {
           direction.copy(abc);
         } else {
           simplex.assign([a, c, b]);
-          direction.copy(abc.multiplyScalar(-1));
+          direction.copy(abc.negate());
         }
       }
     }
@@ -36835,7 +37406,7 @@ class GjkEpa {
     const ab = new Vec3().subVectors(b.point, a.point);
     const ac = new Vec3().subVectors(c.point, a.point);
     const ad = new Vec3().subVectors(d.point, a.point);
-    const ao = a.point.clone().multiplyScalar(-1);
+    const ao = a.point.clone().negate();
     const abc = ab.clone().cross(ac);
     const acd = ac.clone().cross(ad);
     const adb = ad.clone().cross(ab);
@@ -36887,11 +37458,11 @@ class GjkEpa {
     while (minDistance == Infinity) {
       minNormal.set(normals[minFace].x, normals[minFace].y, normals[minFace].z);
       minDistance = normals[minFace].w;
-      if (iterations++ > 50) {
+      if (iterations++ > 10) {
         break;
       }
       const witnessA = colliderA.findFurthestPoint(minNormal);
-      const witnessB = colliderB.findFurthestPoint(minNormal.clone().multiplyScalar(-1));
+      const witnessB = colliderB.findFurthestPoint(minNormal.clone().negate());
       const support = new Support(witnessA, witnessB);
       const sDistance = minNormal.dot(support.point);
       if (Math.abs(sDistance - minDistance) > 1e-3) {
@@ -37037,7 +37608,7 @@ class GjkEpa {
       const normal = new Vec3().subVectors(b.point, a.point).cross(c.point.clone().sub(a.point)).normalize();
       let distance = normal.dot(a.point);
       if (distance < 0) {
-        normal.multiplyScalar(-1);
+        normal.negate();
         distance *= -1;
       }
       normals.push(new Vector4(
@@ -37075,9 +37646,11 @@ class XPBDSolver extends BaseSolver {
   numSubsteps = 20;
   narrowPhase = new GjkEpa();
   static h = 0;
+  collisionCount = 0;
   constructor() {
     super();
     Game.gui.solver.add(this, "numSubsteps", 1, 30);
+    Game.gui.solver.add(this, "collisionCount").listen();
   }
   update(bodies, constraints, dt, gravity) {
     if (dt === 0)
@@ -37085,6 +37658,7 @@ class XPBDSolver extends BaseSolver {
     const h = 1 / 60 / this.numSubsteps;
     XPBDSolver.h = h;
     const collisions = this.collectCollisionPairs(bodies, dt);
+    this.collisionCount = collisions.length;
     for (let i = 0; i < this.numSubsteps; i++) {
       const contacts = this.getContacts(collisions);
       for (let j = 0; j < bodies.length; j++)
@@ -37118,31 +37692,20 @@ class XPBDSolver extends BaseSolver {
           continue;
         combinations.push(guid);
         const collisionMargin = 2 * dt * Vec3.sub(A.vel, B.vel).length();
+        const aabb1 = A.collider.aabb.clone().expandByScalar(collisionMargin + 0.2);
+        const aabb2 = B.collider.aabb.clone().expandByScalar(collisionMargin + 0.2);
         switch (A.collider.colliderType) {
           case ColliderType.ConvexMesh:
             switch (B.collider.colliderType) {
               case ColliderType.ConvexMesh: {
-                const aabb1 = A.collider.aabb.clone().expandByScalar(collisionMargin);
-                const aabb2 = B.collider.aabb.clone().expandByScalar(collisionMargin);
-                if (aabb1.intersectsBox(aabb2)) {
+                if (aabb1.intersectsBox(aabb2))
                   collisions.push(new CollisionPair(A, B));
-                }
                 break;
               }
               case ColliderType.Plane: {
-                const MC = A.collider;
                 const PC = B.collider;
-                const N = PC.normal;
-                let deepestPenetration = 0;
-                for (let i = 0; i < MC.uniqueIndices.length; i++) {
-                  const v = MC.vertices[MC.uniqueIndices[i]];
-                  const contactPointW = A.localToWorld(v);
-                  const signedDistance = contactPointW.clone().sub(B.pose.p).dot(N);
-                  deepestPenetration = Math.min(deepestPenetration, signedDistance);
-                }
-                if (deepestPenetration < collisionMargin) {
+                if (aabb1.intersectsPlane(PC.plane))
                   collisions.push(new CollisionPair(A, B));
-                }
                 break;
               }
             }
@@ -37186,7 +37749,7 @@ class XPBDSolver extends BaseSolver {
       const contact = new ContactSet(
         A,
         B,
-        normal.clone().multiplyScalar(-1),
+        normal.clone().negate(),
         p1,
         p2
       );
@@ -37199,9 +37762,8 @@ class XPBDSolver extends BaseSolver {
     const PC = B.collider;
     const N = new Vec3().copy(PC.normal);
     for (let i = 0; i < MC.uniqueIndices.length; i++) {
-      const v = MC.vertices[MC.uniqueIndices[i]];
-      const r1 = v;
-      const p1 = A.localToWorld(v);
+      const r1 = MC.vertices[MC.uniqueIndices[i]];
+      const p1 = MC.verticesWorldSpace[MC.uniqueIndices[i]];
       const signedDistance = Vec3.dot(N, Vec3.sub(p1, B.pose.p));
       const p2 = Vec3.sub(p1, Vec3.mul(N, signedDistance));
       const r2 = B.worldToLocal(p2);
@@ -37306,7 +37868,7 @@ class XPBDSolver extends BaseSolver {
     if (body0)
       body0.applyCorrection(n, pos0, velocityLevel);
     if (body1)
-      body1.applyCorrection(n.multiplyScalar(-1), pos1, velocityLevel);
+      body1.applyCorrection(n.negate(), pos1, velocityLevel);
     return dlambda;
   }
 }
@@ -37381,7 +37943,7 @@ class BaseConstraint {
   constructor() {
     if (this.debug) {
       for (const h in this.helpers) {
-        World.scene.add(this.helpers[h]);
+        World.debugOverlays.add(this.helpers[h]);
       }
     }
   }
@@ -37389,7 +37951,7 @@ class BaseConstraint {
   destroy() {
     for (const h in this.helpers) {
       const helper = this.helpers.h;
-      World.scene.remove(helper);
+      World.debugOverlays.remove(helper);
       if (helper instanceof ArrowHelper)
         helper.dispose();
     }
@@ -37589,13 +38151,21 @@ class World {
   /**
    * Debug scene
    */
-  static scene = new Scene();
+  static debugOverlays = new Scene();
+  static debugAABBs = new Scene();
+  static debugConvexHulls = new Scene();
+  static enableDebugOverlay = true;
+  static enableDebugAABBs = false;
+  static enableDebugConvexHulls = true;
   solver;
   constructor() {
     this.solver = new XPBDSolver();
     Game.gui.physics.add(this.gravity, "x", -10, 10).step(0.1).name("Gravity x");
     Game.gui.physics.add(this.gravity, "y", -10, 10).step(0.1).name("Gravity y");
     Game.gui.physics.add(this.gravity, "z", -10, 10).step(0.1).name("Gravity z");
+    Game.gui.debug.add(World, "enableDebugAABBs").name("AABBs");
+    Game.gui.debug.add(World, "enableDebugConvexHulls").name("Convex hulls");
+    Game.gui.debug.add(World, "enableDebugOverlay").name("Enable overlays");
     Game.events.on(RayCastEvent, (e) => {
       if (!this.#grabConstraint && !e.intersection)
         return;
@@ -37608,7 +38178,7 @@ class World {
           return;
         this.#grabDistance = e.intersection.distance;
         const localPos = e.body.worldToLocal(e.intersection.point);
-        this.#grabConstraint = new Attachment(localPos, screenPos).setBodies(e.body, null).setStiffness(e.body.mass * 500).setDamping(e.body.mass * 100, e.body.mass * 100);
+        this.#grabConstraint = new Attachment(localPos, screenPos).setBodies(e.body, null).setStiffness(e.body.mass * 500).setDamping(e.body.mass * 100, e.body.mass * 1);
         this.#constraintsFast.push(this.#grabConstraint);
       }
     });
@@ -37641,11 +38211,23 @@ class World {
     }
   }
   draw(renderer, camera) {
+    if (!World.enableDebugOverlay)
+      return;
     renderer.autoClear = false;
     renderer.render(
-      World.scene,
+      World.debugOverlays,
       camera
     );
+    if (World.enableDebugAABBs)
+      renderer.render(
+        World.debugAABBs,
+        camera
+      );
+    if (World.enableDebugConvexHulls)
+      renderer.render(
+        World.debugConvexHulls,
+        camera
+      );
     renderer.autoClear = true;
   }
 }
@@ -37741,8 +38323,8 @@ class BaseLightingScene extends Scene {
     const ground = new Mesh(
       new PlaneGeometry(50, 50, 5, 5),
       new MeshPhongMaterial({
-        color: 4473924,
-        wireframe: true
+        color: 4473924
+        // wireframe: true,
       })
     );
     ground.receiveShadow = true;
@@ -37751,10 +38333,10 @@ class BaseLightingScene extends Scene {
     this.add(ground);
     const p1 = new PointLight(this, 15916485);
     p1.light.castShadow = true;
-    p1.light.position.set(7, 10, 3);
+    p1.light.position.set(-7, 10, 3);
     const p2 = new PointLight(this, 14081773);
     p2.light.castShadow = true;
-    p2.light.position.set(-7, 10, -3);
+    p2.light.position.set(7, 10, -3);
     const ambientLight = new AmbientLight(16777215, 0.35);
     this.add(ambientLight);
   }
@@ -37768,16 +38350,20 @@ class RigidBody {
   prevPose = new Pose();
   vel = new Vec3(0, 0, 0);
   omega = new Vec3(0, 0, 0);
-  // Pre velocity solve velocities
   velPrev = new Vec3(0, 0, 0);
   omegaPrev = new Vec3(0, 0, 0);
-  // private mass = 1.0;
   invMass = 1;
+  invInertia = new Vec3(1, 1, 1);
   get mass() {
     return 1 / this.invMass;
   }
-  // private mass = 1.0;
-  invInertia = new Vec3(1, 1, 1);
+  get inertia() {
+    return new Vec3().set(
+      1 / this.invInertia.x,
+      1 / this.invInertia.y,
+      1 / this.invInertia.z
+    );
+  }
   force = new Vec3();
   torque = new Vec3();
   gravity = 1;
@@ -37795,9 +38381,13 @@ class RigidBody {
     return this;
   }
   addTo(scene) {
+    scene.world.add(this);
     if (this.mesh)
       scene.scene.add(this.mesh);
-    scene.world.add(this);
+    if (this.collider instanceof MeshCollider) {
+      World.debugAABBs.add(this.collider.aabbHelper);
+      World.debugConvexHulls.add(this.collider.convexHull);
+    }
     return this;
   }
   setMesh(mesh, applyTransform = true) {
@@ -37817,6 +38407,29 @@ class RigidBody {
     this.updateCollider();
     return this;
   }
+  setRotation(x, y, z) {
+    this.pose.q.setFromEuler(new Euler(x, y, z));
+    this.updateGeometry();
+    this.updateCollider();
+    return this;
+  }
+  setOmega(x, y, z) {
+    this.omega.set(x, y, z);
+    return this;
+  }
+  setVel(x, y, z) {
+    this.vel.set(x, y, z);
+    return this;
+  }
+  setRestitution(restitution) {
+    this.bounciness = restitution;
+    return this;
+  }
+  setFriction(staticFriction, dynamicFriction) {
+    this.staticFriction = staticFriction;
+    this.dynamicFriction = dynamicFriction;
+    return this;
+  }
   setStatic() {
     this.isDynamic = false;
     this.gravity = 0;
@@ -37834,6 +38447,20 @@ class RigidBody {
       1 / (size.y * size.y + size.z * size.z) / mass,
       1 / (size.z * size.z + size.x * size.x) / mass,
       1 / (size.x * size.x + size.y * size.y) / mass
+    );
+    return this;
+  }
+  setCylinder(radius, height, density = 1) {
+    const r2 = Math.pow(height, 2);
+    const h2 = Math.pow(radius, 2);
+    let mass = Math.PI * r2 * height * density;
+    this.invMass = 1 / mass;
+    const I_axial = 0.5 * mass * r2;
+    const I_radial = 1 / 12 * mass * (3 * r2 + h2);
+    this.invInertia.set(
+      1 / I_radial,
+      1 / I_axial,
+      1 / I_radial
     );
     return this;
   }
@@ -37944,6 +38571,10 @@ class RigidBody {
       this.mesh.position.copy(this.pose.p);
       this.mesh.quaternion.copy(this.pose.q);
     }
+    if (this.collider instanceof MeshCollider) {
+      this.collider.convexHull.position.copy(this.pose.p);
+      this.collider.convexHull.quaternion.copy(this.pose.q);
+    }
   }
   updateCollider() {
     this.collider.updateGlobalPose(this.pose);
@@ -37963,68 +38594,34 @@ function Box(width = 1, height, depth) {
     depth = width;
   const boxMesh = new Mesh(
     new BoxGeometry(width, height, depth),
-    // new THREE.MeshPhongMaterial({
-    //     // color: 0xffffff,
-    //     // color: 0x00ffcc,
-    //     color: new THREE.Color().setHSL(0.5, 1, 0.5),
-    // }),
-    new MeshBasicMaterial({
-      color: 16777215,
-      // 0x00ffcc,
-      wireframe: true,
-      wireframeLinewidth: 2
+    new MeshPhongMaterial({
+      // color: 0xffffff,
+      // color: 0x00ffcc,
+      color: new Color$1().setHSL(0.5, 1, 0.5)
+      // polygonOffset: true,
+      // polygonOffsetFactor: 1, // Gives neater wireframes
+      // polygonOffsetUnits: 1
     })
+    // new THREE.MeshBasicMaterial({
+    //     color: 0xffffff, // 0x00ffcc,
+    //     wireframe: true,
+    //     wireframeLinewidth: 2
+    // })
   );
-  const box = new RigidBody(
-    new MeshCollider().setGeometry("box", width, height, depth)
-  ).setMesh(boxMesh).setBox(new Vec3(width, height, depth), 1);
+  const box = new RigidBody(new MeshCollider().setGeometry(boxMesh.geometry)).setMesh(boxMesh).setBox(new Vec3(width, height, depth), 1);
   return box;
 }
 
-class Constraint {
-  body0;
-  body1;
-  constraints = [];
-  constructor(body0, body1) {
-    if (body0.id == body1.id)
-      throw new Error("Cannot create a constraint for the same body");
-    this.body0 = body0;
-    this.body1 = body1;
-  }
-  add(constraint) {
-    this.constraints.push(constraint);
-    const p1 = constraint.localPose0 ?? new Vec3(0, 0, 0);
-    const p2 = constraint.localPose1 ?? new Vec3(0, 0, 0);
-    constraint.setBodies(
-      this.body0,
-      this.body1,
-      p2,
-      p1
-    );
-    return this;
-  }
-  // public solvePos(h: number) {
-  //     for (const c of this.constraints) {
-  //         c.solvePos(h);
-  //     }
-  // }
-  // public solveVel(h: number) {
-  //     for (const c of this.constraints) {
-  //         c.solveVel(h);
-  //     }
-  // }
-}
-
-class AlignAxes extends BaseConstraint {
-  solvePos(h) {
-    this.updateGlobalPoses();
-    let a0 = this.getQuatAxis0(this.globalPose0.q);
-    this.getQuatAxis1(this.globalPose0.q);
-    this.getQuatAxis2(this.globalPose0.q);
-    let a1 = this.getQuatAxis0(this.globalPose1.q);
-    a0.cross(a1);
-    this.lambda = XPBDSolver.applyBodyPairCorrection(this.body0, this.body1, a0, 0, h);
-  }
+function Tetra(size = 1) {
+  const tetraMesh = new Mesh(
+    new TetrahedronGeometry(size, 0),
+    new MeshPhongMaterial({
+      // color: 0xffffff,
+      color: new Color$1().setHSL(0.5, 1, 0.5)
+    })
+  );
+  const tetra = new RigidBody(new MeshCollider().setGeometry(tetraMesh.geometry)).setMesh(tetraMesh);
+  return tetra;
 }
 
 class MyScene extends BaseScene {
@@ -38040,25 +38637,42 @@ class MyScene extends BaseScene {
     this.addGeometry();
   }
   addGeometry() {
-    let b0, b1;
-    b0 = Box(3, 1, 3).setPos(0, 0.5, 0);
-    this.addBody(b0);
-    b0 = Box(1, 1, 2).setPos(0.1, 2, 0);
-    this.addBody(b0);
+    Box(3, 1, 3).setPos(0, 0.5, 0).addTo(this);
+    Box(1, 1, 2).setPos(0.1, 2, 0).addTo(this);
+    Tetra(1).setPos(6, 4, 0).setVel(-10, 3, 0).setOmega(1, 10, 1).addTo(this);
+    const h = 1;
     for (let i = 0; i < 6; i++) {
-      const h = 2;
-      const b = Box(h);
-      b.pose.p.set(-3, h - h / 2 + 0.05 + h * i, 0);
-      this.addBody(b);
+      Box(h).setPos(-3, h - h / 2 + 0.05 + h * i, 0).addTo(this);
     }
-    b0 = Box(2, 1, 0.2).setPos(3, 1.5, 1);
-    b1 = Box(2, 0.2, 1).setPos(3, 2, 0.4);
-    this.addBody(b0);
-    this.addBody(b1);
-    this.world.addConstraint(
-      new Constraint(b0, b1).add(new Attachment(new Vec3(0, 0, 0.5), new Vec3(0, 0.6, 0))).add(new AlignAxes())
-      // .add(new AlignOrientation)
+    const customMesh = new Mesh(
+      new TorusKnotGeometry(0.8, 0.15, 48, 6),
+      new MeshPhongMaterial({
+        color: new Color$1().setHSL(0.5, 1, 0.5)
+      })
+      // new THREE.MeshBasicMaterial({
+      //     color: 0xffffff,
+      //     wireframe: true,
+      //     wireframeLinewidth: 2
+      // })
     );
+    new RigidBody(
+      new MeshCollider().setGeometry(customMesh.geometry)
+    ).setMesh(customMesh).setPos(4, 2, 0).setBox(new Vec3(1, 1, 1), 1).addTo(this);
+    const coinSize = new Vector2(1.5, 0.3);
+    const coinMesh = new Mesh(
+      new CylinderGeometry(coinSize.x, coinSize.x, coinSize.y, 32, 1),
+      new MeshPhongMaterial({
+        color: new Color$1().setHSL(0.5, 1, 0.5)
+      })
+      // new THREE.MeshBasicMaterial({
+      //     color: 0xffffff,
+      //     wireframe: true,
+      //     wireframeLinewidth: 2
+      // })
+    );
+    new RigidBody(
+      new MeshCollider().setGeometry(coinMesh.geometry)
+    ).setMesh(coinMesh).setPos(0, 1, 5).setRotation(0.4, 0, 0).setOmega(0, 22, 0).setFriction(1, 0.4).setRestitution(0.85).setCylinder(coinSize.x, coinSize.y, 300).addTo(this);
     this.addGround();
   }
   update(time, dt, keys) {
