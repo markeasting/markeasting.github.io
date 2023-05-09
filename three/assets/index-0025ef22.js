@@ -30497,79 +30497,6 @@ class AmbientLight extends Light {
 
 }
 
-class Clock {
-
-	constructor( autoStart = true ) {
-
-		this.autoStart = autoStart;
-
-		this.startTime = 0;
-		this.oldTime = 0;
-		this.elapsedTime = 0;
-
-		this.running = false;
-
-	}
-
-	start() {
-
-		this.startTime = now();
-
-		this.oldTime = this.startTime;
-		this.elapsedTime = 0;
-		this.running = true;
-
-	}
-
-	stop() {
-
-		this.getElapsedTime();
-		this.running = false;
-		this.autoStart = false;
-
-	}
-
-	getElapsedTime() {
-
-		this.getDelta();
-		return this.elapsedTime;
-
-	}
-
-	getDelta() {
-
-		let diff = 0;
-
-		if ( this.autoStart && ! this.running ) {
-
-			this.start();
-			return 0;
-
-		}
-
-		if ( this.running ) {
-
-			const newTime = now();
-
-			diff = ( newTime - this.oldTime ) / 1000;
-			this.oldTime = newTime;
-
-			this.elapsedTime += diff;
-
-		}
-
-		return diff;
-
-	}
-
-}
-
-function now() {
-
-	return ( typeof performance === 'undefined' ? Date : performance ).now(); // see #10732
-
-}
-
 class Raycaster {
 
 	constructor( origin, direction, near = 0, far = Infinity ) {
@@ -31124,506 +31051,6 @@ if ( typeof window !== 'undefined' ) {
 	} else {
 
 		window.__THREE__ = REVISION;
-
-	}
-
-}
-
-/**
- * Full-screen textured quad shader
- */
-
-const CopyShader = {
-
-	uniforms: {
-
-		'tDiffuse': { value: null },
-		'opacity': { value: 1.0 }
-
-	},
-
-	vertexShader: /* glsl */`
-
-		varying vec2 vUv;
-
-		void main() {
-
-			vUv = uv;
-			gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
-
-		}`,
-
-	fragmentShader: /* glsl */`
-
-		uniform float opacity;
-
-		uniform sampler2D tDiffuse;
-
-		varying vec2 vUv;
-
-		void main() {
-
-			gl_FragColor = texture2D( tDiffuse, vUv );
-			gl_FragColor.a *= opacity;
-
-
-		}`
-
-};
-
-class Pass {
-
-	constructor() {
-
-		// if set to true, the pass is processed by the composer
-		this.enabled = true;
-
-		// if set to true, the pass indicates to swap read and write buffer after rendering
-		this.needsSwap = true;
-
-		// if set to true, the pass clears its buffer before rendering
-		this.clear = false;
-
-		// if set to true, the result of the pass is rendered to screen. This is set automatically by EffectComposer.
-		this.renderToScreen = false;
-
-	}
-
-	setSize( /* width, height */ ) {}
-
-	render( /* renderer, writeBuffer, readBuffer, deltaTime, maskActive */ ) {
-
-		console.error( 'THREE.Pass: .render() must be implemented in derived pass.' );
-
-	}
-
-	dispose() {}
-
-}
-
-// Helper for passes that need to fill the viewport with a single quad.
-
-const _camera = new OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
-
-// https://github.com/mrdoob/three.js/pull/21358
-
-const _geometry = new BufferGeometry();
-_geometry.setAttribute( 'position', new Float32BufferAttribute( [ - 1, 3, 0, - 1, - 1, 0, 3, - 1, 0 ], 3 ) );
-_geometry.setAttribute( 'uv', new Float32BufferAttribute( [ 0, 2, 0, 0, 2, 0 ], 2 ) );
-
-class FullScreenQuad {
-
-	constructor( material ) {
-
-		this._mesh = new Mesh( _geometry, material );
-
-	}
-
-	dispose() {
-
-		this._mesh.geometry.dispose();
-
-	}
-
-	render( renderer ) {
-
-		renderer.render( this._mesh, _camera );
-
-	}
-
-	get material() {
-
-		return this._mesh.material;
-
-	}
-
-	set material( value ) {
-
-		this._mesh.material = value;
-
-	}
-
-}
-
-class ShaderPass extends Pass {
-
-	constructor( shader, textureID ) {
-
-		super();
-
-		this.textureID = ( textureID !== undefined ) ? textureID : 'tDiffuse';
-
-		if ( shader instanceof ShaderMaterial ) {
-
-			this.uniforms = shader.uniforms;
-
-			this.material = shader;
-
-		} else if ( shader ) {
-
-			this.uniforms = UniformsUtils.clone( shader.uniforms );
-
-			this.material = new ShaderMaterial( {
-
-				defines: Object.assign( {}, shader.defines ),
-				uniforms: this.uniforms,
-				vertexShader: shader.vertexShader,
-				fragmentShader: shader.fragmentShader
-
-			} );
-
-		}
-
-		this.fsQuad = new FullScreenQuad( this.material );
-
-	}
-
-	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
-
-		if ( this.uniforms[ this.textureID ] ) {
-
-			this.uniforms[ this.textureID ].value = readBuffer.texture;
-
-		}
-
-		this.fsQuad.material = this.material;
-
-		if ( this.renderToScreen ) {
-
-			renderer.setRenderTarget( null );
-			this.fsQuad.render( renderer );
-
-		} else {
-
-			renderer.setRenderTarget( writeBuffer );
-			// TODO: Avoid using autoClear properties, see https://github.com/mrdoob/three.js/pull/15571#issuecomment-465669600
-			if ( this.clear ) renderer.clear( renderer.autoClearColor, renderer.autoClearDepth, renderer.autoClearStencil );
-			this.fsQuad.render( renderer );
-
-		}
-
-	}
-
-	dispose() {
-
-		this.material.dispose();
-
-		this.fsQuad.dispose();
-
-	}
-
-}
-
-class MaskPass extends Pass {
-
-	constructor( scene, camera ) {
-
-		super();
-
-		this.scene = scene;
-		this.camera = camera;
-
-		this.clear = true;
-		this.needsSwap = false;
-
-		this.inverse = false;
-
-	}
-
-	render( renderer, writeBuffer, readBuffer /*, deltaTime, maskActive */ ) {
-
-		const context = renderer.getContext();
-		const state = renderer.state;
-
-		// don't update color or depth
-
-		state.buffers.color.setMask( false );
-		state.buffers.depth.setMask( false );
-
-		// lock buffers
-
-		state.buffers.color.setLocked( true );
-		state.buffers.depth.setLocked( true );
-
-		// set up stencil
-
-		let writeValue, clearValue;
-
-		if ( this.inverse ) {
-
-			writeValue = 0;
-			clearValue = 1;
-
-		} else {
-
-			writeValue = 1;
-			clearValue = 0;
-
-		}
-
-		state.buffers.stencil.setTest( true );
-		state.buffers.stencil.setOp( context.REPLACE, context.REPLACE, context.REPLACE );
-		state.buffers.stencil.setFunc( context.ALWAYS, writeValue, 0xffffffff );
-		state.buffers.stencil.setClear( clearValue );
-		state.buffers.stencil.setLocked( true );
-
-		// draw into the stencil buffer
-
-		renderer.setRenderTarget( readBuffer );
-		if ( this.clear ) renderer.clear();
-		renderer.render( this.scene, this.camera );
-
-		renderer.setRenderTarget( writeBuffer );
-		if ( this.clear ) renderer.clear();
-		renderer.render( this.scene, this.camera );
-
-		// unlock color and depth buffer for subsequent rendering
-
-		state.buffers.color.setLocked( false );
-		state.buffers.depth.setLocked( false );
-
-		// only render where stencil is set to 1
-
-		state.buffers.stencil.setLocked( false );
-		state.buffers.stencil.setFunc( context.EQUAL, 1, 0xffffffff ); // draw if == 1
-		state.buffers.stencil.setOp( context.KEEP, context.KEEP, context.KEEP );
-		state.buffers.stencil.setLocked( true );
-
-	}
-
-}
-
-class ClearMaskPass extends Pass {
-
-	constructor() {
-
-		super();
-
-		this.needsSwap = false;
-
-	}
-
-	render( renderer /*, writeBuffer, readBuffer, deltaTime, maskActive */ ) {
-
-		renderer.state.buffers.stencil.setLocked( false );
-		renderer.state.buffers.stencil.setTest( false );
-
-	}
-
-}
-
-class EffectComposer {
-
-	constructor( renderer, renderTarget ) {
-
-		this.renderer = renderer;
-
-		if ( renderTarget === undefined ) {
-
-			const size = renderer.getSize( new Vector2() );
-			this._pixelRatio = renderer.getPixelRatio();
-			this._width = size.width;
-			this._height = size.height;
-
-			renderTarget = new WebGLRenderTarget( this._width * this._pixelRatio, this._height * this._pixelRatio );
-			renderTarget.texture.name = 'EffectComposer.rt1';
-
-		} else {
-
-			this._pixelRatio = 1;
-			this._width = renderTarget.width;
-			this._height = renderTarget.height;
-
-		}
-
-		this.renderTarget1 = renderTarget;
-		this.renderTarget2 = renderTarget.clone();
-		this.renderTarget2.texture.name = 'EffectComposer.rt2';
-
-		this.writeBuffer = this.renderTarget1;
-		this.readBuffer = this.renderTarget2;
-
-		this.renderToScreen = true;
-
-		this.passes = [];
-
-		this.copyPass = new ShaderPass( CopyShader );
-
-		this.clock = new Clock();
-
-	}
-
-	swapBuffers() {
-
-		const tmp = this.readBuffer;
-		this.readBuffer = this.writeBuffer;
-		this.writeBuffer = tmp;
-
-	}
-
-	addPass( pass ) {
-
-		this.passes.push( pass );
-		pass.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
-
-	}
-
-	insertPass( pass, index ) {
-
-		this.passes.splice( index, 0, pass );
-		pass.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
-
-	}
-
-	removePass( pass ) {
-
-		const index = this.passes.indexOf( pass );
-
-		if ( index !== - 1 ) {
-
-			this.passes.splice( index, 1 );
-
-		}
-
-	}
-
-	isLastEnabledPass( passIndex ) {
-
-		for ( let i = passIndex + 1; i < this.passes.length; i ++ ) {
-
-			if ( this.passes[ i ].enabled ) {
-
-				return false;
-
-			}
-
-		}
-
-		return true;
-
-	}
-
-	render( deltaTime ) {
-
-		// deltaTime value is in seconds
-
-		if ( deltaTime === undefined ) {
-
-			deltaTime = this.clock.getDelta();
-
-		}
-
-		const currentRenderTarget = this.renderer.getRenderTarget();
-
-		let maskActive = false;
-
-		for ( let i = 0, il = this.passes.length; i < il; i ++ ) {
-
-			const pass = this.passes[ i ];
-
-			if ( pass.enabled === false ) continue;
-
-			pass.renderToScreen = ( this.renderToScreen && this.isLastEnabledPass( i ) );
-			pass.render( this.renderer, this.writeBuffer, this.readBuffer, deltaTime, maskActive );
-
-			if ( pass.needsSwap ) {
-
-				if ( maskActive ) {
-
-					const context = this.renderer.getContext();
-					const stencil = this.renderer.state.buffers.stencil;
-
-					//context.stencilFunc( context.NOTEQUAL, 1, 0xffffffff );
-					stencil.setFunc( context.NOTEQUAL, 1, 0xffffffff );
-
-					this.copyPass.render( this.renderer, this.writeBuffer, this.readBuffer, deltaTime );
-
-					//context.stencilFunc( context.EQUAL, 1, 0xffffffff );
-					stencil.setFunc( context.EQUAL, 1, 0xffffffff );
-
-				}
-
-				this.swapBuffers();
-
-			}
-
-			if ( MaskPass !== undefined ) {
-
-				if ( pass instanceof MaskPass ) {
-
-					maskActive = true;
-
-				} else if ( pass instanceof ClearMaskPass ) {
-
-					maskActive = false;
-
-				}
-
-			}
-
-		}
-
-		this.renderer.setRenderTarget( currentRenderTarget );
-
-	}
-
-	reset( renderTarget ) {
-
-		if ( renderTarget === undefined ) {
-
-			const size = this.renderer.getSize( new Vector2() );
-			this._pixelRatio = this.renderer.getPixelRatio();
-			this._width = size.width;
-			this._height = size.height;
-
-			renderTarget = this.renderTarget1.clone();
-			renderTarget.setSize( this._width * this._pixelRatio, this._height * this._pixelRatio );
-
-		}
-
-		this.renderTarget1.dispose();
-		this.renderTarget2.dispose();
-		this.renderTarget1 = renderTarget;
-		this.renderTarget2 = renderTarget.clone();
-
-		this.writeBuffer = this.renderTarget1;
-		this.readBuffer = this.renderTarget2;
-
-	}
-
-	setSize( width, height ) {
-
-		this._width = width;
-		this._height = height;
-
-		const effectiveWidth = this._width * this._pixelRatio;
-		const effectiveHeight = this._height * this._pixelRatio;
-
-		this.renderTarget1.setSize( effectiveWidth, effectiveHeight );
-		this.renderTarget2.setSize( effectiveWidth, effectiveHeight );
-
-		for ( let i = 0; i < this.passes.length; i ++ ) {
-
-			this.passes[ i ].setSize( effectiveWidth, effectiveHeight );
-
-		}
-
-	}
-
-	setPixelRatio( pixelRatio ) {
-
-		this._pixelRatio = pixelRatio;
-
-		this.setSize( this._width, this._height );
-
-	}
-
-	dispose() {
-
-		this.renderTarget1.dispose();
-		this.renderTarget2.dispose();
-
-		this.copyPass.dispose();
 
 	}
 
@@ -34167,29 +33594,25 @@ class Game {
   static mouseDrag = false;
   static keys = {};
   static scene = void 0;
+  static sceneSelector = {};
   static debugOverlay = true;
   static stepPhysics = false;
   dt = 0;
   time = 0;
   prevTime = 0;
   static _gui = new GUI$1();
-  static gui = {
-    "physics": this._gui.addFolder("Physics"),
-    "solver": this._gui.addFolder("Solver"),
-    "debug": this._gui.addFolder("Debugging")
-  };
+  static gui = {};
   constructor(canvasID) {
     Game.canvas = document.getElementById(canvasID);
     Game.renderer = new WebGLRenderer({
       canvas: Game.canvas,
       antialias: true
     });
-    Game.composer = new EffectComposer(Game.renderer);
     Game.renderer.setPixelRatio(1);
-    this.fitContent();
+    Game.fitContent();
     Game.renderer.shadowMap.enabled = true;
     Game.renderer.shadowMap.type = PCFSoftShadowMap;
-    window.addEventListener("resize", this.fitContent.bind(this));
+    window.addEventListener("resize", Game.fitContent.bind(this));
     window.addEventListener("keydown", (e) => {
       Game.keys[e.code] = true;
       if (e.code == "Space") {
@@ -34200,28 +33623,51 @@ class Game {
     window.addEventListener("keyup", (e) => {
       Game.keys[e.code] = false;
     });
-    window.addEventListener("mousedown", this.onMouse.bind(this));
-    window.addEventListener("mousemove", this.onMouse.bind(this));
-    window.addEventListener("mouseup", this.onMouse.bind(this));
-    Game.gui.physics.add(Game, "stepPhysics").name("Step physics");
+    Game.renderer.domElement.addEventListener("mousedown", this.onMouse.bind(this));
+    Game.renderer.domElement.addEventListener("mousemove", this.onMouse.bind(this));
+    Game.renderer.domElement.addEventListener("mouseup", this.onMouse.bind(this));
   }
-  setupRenderPass() {
+  static setupRenderPass() {
     return;
   }
-  fitContent() {
+  static fitContent() {
     const canvas = Game.canvas;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
     Game.renderer.setSize(width, height, false);
-    Game.composer.setSize(width, height);
+    Game.composer?.setSize(width, height);
     if (Game.scene)
       Game.scene.onResize(width, height);
   }
-  add(scene) {
-    Game.scene = scene;
-    Game.scene.init();
-    this.fitContent();
-    this.setupRenderPass();
+  static setSceneSelector(selector) {
+    if (selector)
+      Game.sceneSelector = selector;
+  }
+  static changeScene(scene) {
+    Game._gui.destroy();
+    Game._gui = new GUI$1();
+    Game.gui = {
+      "scene": Game._gui.addFolder("Scene"),
+      "physics": Game._gui.addFolder("Physics"),
+      "solver": Game._gui.addFolder("Solver"),
+      "debug": Game._gui.addFolder("Debugging")
+    };
+    Game.gui.physics.add(Game, "stepPhysics").name("Step physics");
+    Game.gui.scene.open();
+    Game.gui.scene.add(
+      Game.sceneSelector,
+      "current",
+      Object.keys(Game.sceneSelector.options)
+    ).name("Select demo").onChange((val) => {
+      Game.changeScene(Game.sceneSelector.options[val]);
+    });
+    Game.scene = new scene();
+    if (!Game.scene.initialized) {
+      Game.scene.init();
+      Game.scene.initialized = true;
+    }
+    Game.fitContent();
+    Game.setupRenderPass();
   }
   update(time) {
     this.prevTime = this.time;
@@ -34230,7 +33676,11 @@ class Game {
     if (Game.scene) {
       Game.scene.updatePhysics(this.dt, !Game.stepPhysics);
       Game.scene.update(time, this.dt, Game.keys);
-      Game.renderer.render(Game.scene.scene, Game.scene.camera);
+      if (Game.composer) {
+        Game.composer.render();
+      } else {
+        Game.renderer.render(Game.scene.scene, Game.scene.camera);
+      }
       Game.scene.world.draw(Game.renderer, Game.scene.camera);
     }
   }
@@ -35542,92 +34992,47 @@ class Vec3 extends Vector3 {
   }
 }
 
-class CollisionPair {
-  constructor(A, B) {
-    this.A = A;
-    this.B = B;
-    if (A === B || A.id == B.id)
-      throw new Error("Cannot create a CollisionPair with the same body");
+class Pose {
+  p;
+  // = new Vec3(0.0, 0.0, 0.0);
+  q;
+  // = new Quat(1.0, 0.0, 0.0, 0.0);
+  constructor(p = new Vec3(0, 0, 0), q = new Quaternion()) {
+    this.p = p.clone();
+    this.q = q.clone();
   }
-}
-
-class ContactSet {
-  A;
-  B;
-  // plane: Plane;
-  lambda = 0;
-  //  λ   - lambda
-  lambda_n = 0;
-  //  λn  - lambda N (normal)
-  lambda_t = 0;
-  //  λn  - lambda T (tangential)
-  /**
-   * Contact point (world, on A)
-   */
-  p1 = new Vec3(0, 0, 0);
-  /**
-   * Contact point (world, on B)
-   */
-  p2 = new Vec3(0, 0, 0);
-  /**
-   * Contact point (local on A)
-   */
-  r1 = new Vec3(0, 0, 0);
-  /**
-   * Contact point (local on B)
-   */
-  r2 = new Vec3(0, 0, 0);
-  /**
-   * Contact normal
-   */
-  n = new Vec3(0, 0, 0);
-  /**
-   * Penetration depth
-   */
-  d = 0;
-  /**
-   * Relative velocity
-   */
-  vrel = new Vec3(0, 0, 0);
-  /**
-   * Normal velocity
-   */
-  vn = 0;
-  e = 0;
-  // Coefficient of restitution
-  staticFriction = 0;
-  dynamicFriction = 0;
-  F = new Vec3(0, 0, 0);
-  // Current constraint force
-  Fn = 0;
-  // Current constraint force (normal direction) == -contact.lambda_n / (h * h);
-  constructor(A, B, normal, p1, p2, r1, r2) {
-    if (A === B || A.id == B.id)
-      throw new Error("Cannot create a ContactSet with the same body");
-    this.A = A;
-    this.B = B;
-    this.p1 = p1;
-    this.p2 = p2;
-    this.r1 = r1 ?? this.A.worldToLocal(p1);
-    this.r2 = r2 ?? this.B.worldToLocal(p2);
-    this.n = normal.clone();
-    this.vrel = Vec3.sub(
-      this.A.getVelocityAt(this.p1),
-      this.B.getVelocityAt(this.p2)
-    );
-    this.vn = this.vrel.dot(this.n);
-    this.e = 0.5 * (A.restitution + B.restitution);
-    this.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
-    this.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
+  copy(other) {
+    this.p.copy(other.p);
+    this.q.copy(other.q);
   }
-  update() {
-    const A = this.A;
-    const B = this.B;
-    const p1 = A.pose.p.clone().add(this.r1.clone().applyQuaternion(A.pose.q));
-    const p2 = B.pose.p.clone().add(this.r2.clone().applyQuaternion(B.pose.q));
-    this.p1 = p1;
-    this.p2 = p2;
-    this.d = -Vec3.dot(Vec3.sub(this.p1, this.p2), this.n);
+  clone() {
+    return new Pose(this.p, this.q);
+  }
+  translate(v) {
+    v.add(this.p);
+  }
+  invTranslate(v) {
+    v.sub(this.p);
+  }
+  rotate(v) {
+    v.applyQuaternion(this.q);
+  }
+  invRotate(v) {
+    const inv = this.q.clone().conjugate();
+    v.applyQuaternion(inv);
+  }
+  transform(v) {
+    v.applyQuaternion(this.q);
+    v.add(this.p);
+  }
+  invTransform(v) {
+    v.sub(this.p);
+    this.invRotate(v);
+  }
+  transformPose(pose) {
+    pose.q.multiplyQuaternions(this.q, pose.q);
+    this.rotate(pose.p);
+    pose.p.add(this.p);
   }
 }
 
@@ -37203,6 +36608,95 @@ class MeshCollider extends Collider {
   }
 }
 
+class CollisionPair {
+  constructor(A, B) {
+    this.A = A;
+    this.B = B;
+    if (A === B || A.id == B.id)
+      throw new Error("Cannot create a CollisionPair with the same body");
+  }
+}
+
+class ContactSet {
+  A;
+  B;
+  // plane: Plane;
+  lambda = 0;
+  //  λ   - lambda
+  lambda_n = 0;
+  //  λn  - lambda N (normal)
+  lambda_t = 0;
+  //  λn  - lambda T (tangential)
+  /**
+   * Contact point (world, on A)
+   */
+  p1 = new Vec3(0, 0, 0);
+  /**
+   * Contact point (world, on B)
+   */
+  p2 = new Vec3(0, 0, 0);
+  /**
+   * Contact point (local on A)
+   */
+  r1 = new Vec3(0, 0, 0);
+  /**
+   * Contact point (local on B)
+   */
+  r2 = new Vec3(0, 0, 0);
+  /**
+   * Contact normal
+   */
+  n = new Vec3(0, 0, 0);
+  /**
+   * Penetration depth
+   */
+  d = 0;
+  /**
+   * Relative velocity
+   */
+  vrel = new Vec3(0, 0, 0);
+  /**
+   * Normal velocity
+   */
+  vn = 0;
+  e = 0;
+  // Coefficient of restitution
+  staticFriction = 0;
+  dynamicFriction = 0;
+  F = new Vec3(0, 0, 0);
+  // Current constraint force
+  Fn = 0;
+  // Current constraint force (normal direction) == -contact.lambda_n / (h * h);
+  constructor(A, B, normal, p1, p2, r1, r2) {
+    if (A === B || A.id == B.id)
+      throw new Error("Cannot create a ContactSet with the same body");
+    this.A = A;
+    this.B = B;
+    this.p1 = p1;
+    this.p2 = p2;
+    this.r1 = r1 ?? this.A.worldToLocal(p1);
+    this.r2 = r2 ?? this.B.worldToLocal(p2);
+    this.n = normal.clone();
+    this.vrel = Vec3.sub(
+      this.A.getVelocityAt(this.p1),
+      this.B.getVelocityAt(this.p2)
+    );
+    this.vn = this.vrel.dot(this.n);
+    this.e = 0.5 * (A.restitution + B.restitution);
+    this.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
+    this.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
+  }
+  update() {
+    const A = this.A;
+    const B = this.B;
+    const p1 = A.pose.p.clone().add(this.r1.clone().applyQuaternion(A.pose.q));
+    const p2 = B.pose.p.clone().add(this.r2.clone().applyQuaternion(B.pose.q));
+    this.p1 = p1;
+    this.p2 = p2;
+    this.d = -Vec3.dot(Vec3.sub(this.p1, this.p2), this.n);
+  }
+}
+
 class BaseSolver {
   debugContacts = false;
   // @TODO move helpers to World
@@ -37893,50 +37387,6 @@ class XPBDSolver extends BaseSolver {
   }
 }
 
-class Pose {
-  p;
-  // = new Vec3(0.0, 0.0, 0.0);
-  q;
-  // = new Quat(1.0, 0.0, 0.0, 0.0);
-  constructor(p = new Vec3(0, 0, 0), q = new Quaternion()) {
-    this.p = p.clone();
-    this.q = q.clone();
-  }
-  copy(other) {
-    this.p.copy(other.p);
-    this.q.copy(other.q);
-  }
-  clone() {
-    return new Pose(this.p, this.q);
-  }
-  translate(v) {
-    v.add(this.p);
-  }
-  invTranslate(v) {
-    v.sub(this.p);
-  }
-  rotate(v) {
-    v.applyQuaternion(this.q);
-  }
-  invRotate(v) {
-    const inv = this.q.clone().conjugate();
-    v.applyQuaternion(inv);
-  }
-  transform(v) {
-    v.applyQuaternion(this.q);
-    v.add(this.p);
-  }
-  invTransform(v) {
-    v.sub(this.p);
-    this.invRotate(v);
-  }
-  transformPose(pose) {
-    pose.q.multiplyQuaternions(this.q, pose.q);
-    this.rotate(pose.p);
-    pose.p.add(this.p);
-  }
-}
-
 class BaseConstraint {
   body0;
   body1;
@@ -38009,7 +37459,7 @@ class BaseConstraint {
   }
   setDamping(posDamping, rotDamping) {
     this.posDamping = posDamping;
-    this.rotDamping = rotDamping;
+    this.rotDamping = rotDamping ? rotDamping : posDamping;
     return this;
   }
   getForce(h) {
@@ -38254,116 +37704,6 @@ class World {
   }
 }
 
-class BaseScene {
-  active = true;
-  scene;
-  camera;
-  orbitControls;
-  meshes = [];
-  world = new World();
-  constructor() {
-    this.scene = new Scene();
-    this.camera = new PerspectiveCamera(70, 1, 0.1, 5e3);
-    this.orbitControls = new OrbitControls(this.camera, document.getElementById("canvas"));
-    if (localStorage.getItem("cam")) {
-      const state = JSON.parse(localStorage.getItem("cam"));
-      this.camera.position.copy(state.pos);
-      this.orbitControls.target.copy(state.target);
-      this.orbitControls.update();
-    } else {
-      this.camera.position.set(5, 5, 5);
-    }
-    Game.events.on(RayCastEvent, (e) => {
-      this.orbitControls.enabled = false;
-    });
-    document.addEventListener("mouseup", () => {
-      this.orbitControls.enabled = true;
-      localStorage.setItem("cam", JSON.stringify({
-        pos: this.camera.position,
-        target: new Vec3(0, 1, 0)
-      }));
-    });
-  }
-  insert(otherScene) {
-    this.scene.add(otherScene);
-    this.scene.fog = otherScene.fog;
-    this.scene.background = otherScene.background;
-  }
-  onResize(width, height) {
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-  }
-  onActivate() {
-  }
-  onDeactivate() {
-  }
-  init() {
-  }
-  update(time, dt, keys) {
-  }
-  updatePhysics(dt, enabled = true) {
-    if (enabled)
-      this.world.update(dt);
-  }
-  addBody(body) {
-    body.addTo(this);
-  }
-  draw(renderer) {
-    renderer.render(
-      this.scene,
-      this.camera
-    );
-  }
-}
-
-class PointLight {
-  light;
-  helper;
-  debug = true;
-  constructor(scene, color = 16777215, intensity = 1, distance = 25) {
-    this.light = new PointLight$1(color, intensity, distance);
-    scene.add(this.light);
-    this.light.shadow.mapSize.width = 1024;
-    this.light.shadow.mapSize.height = 1024;
-    this.light.shadow.camera.near = 0.5;
-    this.light.shadow.camera.far = distance;
-    if (this.debug) {
-      this.helper = new PointLightHelper(this.light);
-      scene.add(this.helper);
-    }
-  }
-  setColor(color, intensity) {
-    this.light.color = color;
-    if (intensity)
-      this.light.intensity = intensity;
-  }
-}
-
-class BaseLightingScene extends Scene {
-  constructor() {
-    super();
-    const ground = new Mesh(
-      new PlaneGeometry(50, 50, 5, 5),
-      new MeshPhongMaterial({
-        color: 4473924
-        // wireframe: true,
-      })
-    );
-    ground.receiveShadow = true;
-    ground.rotation.x = -Math.PI / 2;
-    ground.position.z = 0;
-    this.add(ground);
-    const p1 = new PointLight(this, 15916485);
-    p1.light.castShadow = true;
-    p1.light.position.set(-7, 10, 3);
-    const p2 = new PointLight(this, 14081773);
-    p2.light.castShadow = true;
-    p2.light.position.set(7, 10, -3);
-    const ambientLight = new AmbientLight(16777215, 0.35);
-    this.add(ambientLight);
-  }
-}
-
 class RigidBody {
   id = 0;
   mesh;
@@ -38421,6 +37761,11 @@ class RigidBody {
     }
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    return this;
+  }
+  setWireframe(state = false) {
+    if (this.mesh)
+      this.mesh.material.wireframe = true;
     return this;
   }
   setPos(x, y, z) {
@@ -38609,6 +37954,137 @@ class RigidBody {
   }
 }
 
+class BaseScene {
+  active = true;
+  scene;
+  camera;
+  orbitControls;
+  meshes = [];
+  world = new World();
+  initialized = false;
+  constructor() {
+    this.scene = new Scene();
+    this.camera = new PerspectiveCamera(70, 1, 0.1, 5e3);
+    this.orbitControls = new OrbitControls(this.camera, document.getElementById("canvas"));
+    if (localStorage.getItem("cam")) {
+      const state = JSON.parse(localStorage.getItem("cam"));
+      this.camera.position.copy(state.pos);
+      this.orbitControls.target.copy(state.target);
+      this.orbitControls.update();
+    } else {
+      const lookAt = new Vec3(0, 0, 0);
+      this.camera.lookAt(lookAt);
+      this.camera.position.set(5, 5, 5);
+      this.orbitControls.target.copy(lookAt);
+      this.orbitControls.update();
+    }
+    Game.events.on(RayCastEvent, (e) => {
+      this.orbitControls.enabled = false;
+    });
+    document.addEventListener("mouseup", () => {
+      this.orbitControls.enabled = true;
+      localStorage.setItem("cam", JSON.stringify({
+        pos: this.camera.position,
+        target: new Vec3(0, 1, 0)
+      }));
+    });
+  }
+  insert(otherScene) {
+    this.scene.add(otherScene);
+    this.scene.fog = otherScene.fog;
+    this.scene.background = otherScene.background;
+  }
+  onResize(width, height) {
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+  }
+  onActivate() {
+  }
+  onDeactivate() {
+  }
+  init() {
+  }
+  update(time, dt, keys) {
+  }
+  updatePhysics(dt, enabled = true) {
+    if (enabled)
+      this.world.update(dt);
+  }
+  addBody(body) {
+    body.addTo(this);
+  }
+  draw(renderer) {
+    renderer.render(
+      this.scene,
+      this.camera
+    );
+  }
+  addGround() {
+    const ground = new RigidBody(
+      new PlaneCollider(new Vector2(100, 100)),
+      new Mesh(
+        new PlaneGeometry(0.1, 0.1, 5, 5),
+        new MeshPhongMaterial({
+          color: 16777215
+          // wireframe: true,
+        })
+      )
+    );
+    ground.pose.q.setFromEuler(new Euler(-Math.PI / 2, 0, 0));
+    ground.pose.p.copy(new Vec3(0, 0, 0));
+    ground.setStatic();
+    this.addBody(ground);
+  }
+}
+
+class PointLight {
+  light;
+  helper;
+  debug = true;
+  constructor(scene, color = 16777215, intensity = 1, distance = 25) {
+    this.light = new PointLight$1(color, intensity, distance);
+    scene.add(this.light);
+    this.light.shadow.mapSize.width = 1024;
+    this.light.shadow.mapSize.height = 1024;
+    this.light.shadow.camera.near = 0.5;
+    this.light.shadow.camera.far = distance;
+    if (this.debug) {
+      this.helper = new PointLightHelper(this.light);
+      scene.add(this.helper);
+    }
+  }
+  setColor(color, intensity) {
+    this.light.color = color;
+    if (intensity)
+      this.light.intensity = intensity;
+  }
+}
+
+class BaseLightingScene extends Scene {
+  constructor() {
+    super();
+    const ground = new Mesh(
+      new PlaneGeometry(50, 50, 5, 5),
+      new MeshPhongMaterial({
+        color: 4473924
+        // wireframe: true,
+      })
+    );
+    ground.receiveShadow = true;
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.z = 0;
+    this.add(ground);
+    const p1 = new PointLight(this, 15916485);
+    p1.light.castShadow = true;
+    p1.light.position.set(-7, 10, 3);
+    const p2 = new PointLight(this, 14081773);
+    p2.light.castShadow = true;
+    p2.light.position.set(7, 10, -3);
+    const ambientLight = new AmbientLight(16777215, 0.35);
+    this.add(ambientLight);
+  }
+}
+
 function Box(width = 1, height, depth) {
   if (!height)
     height = width;
@@ -38634,6 +38110,226 @@ function Box(width = 1, height, depth) {
   return box;
 }
 
+class Constraint {
+  body0;
+  body1;
+  constraints = [];
+  constructor(body0, body1) {
+    if (body0.id == body1.id)
+      throw new Error("Cannot create a constraint for the same body");
+    this.body0 = body0;
+    this.body1 = body1;
+  }
+  add(constraint) {
+    this.constraints.push(constraint);
+    const p1 = constraint.localPose0 ?? new Vec3(0, 0, 0);
+    const p2 = constraint.localPose1 ?? new Vec3(0, 0, 0);
+    constraint.setBodies(
+      this.body0,
+      this.body1,
+      p2,
+      p1
+    );
+    return this;
+  }
+  // public solvePos(h: number) {
+  //     for (const c of this.constraints) {
+  //         c.solvePos(h);
+  //     }
+  // }
+  // public solveVel(h: number) {
+  //     for (const c of this.constraints) {
+  //         c.solveVel(h);
+  //     }
+  // }
+}
+
+class AlignAxes extends BaseConstraint {
+  solvePos(h) {
+    this.updateGlobalPoses();
+    let a0 = this.getQuatAxis0(this.globalPose0.q);
+    this.getQuatAxis1(this.globalPose0.q);
+    this.getQuatAxis2(this.globalPose0.q);
+    let a1 = this.getQuatAxis0(this.globalPose1.q);
+    a0.cross(a1);
+    this.lambda = XPBDSolver.applyBodyPairCorrection(this.body0, this.body1, a0, 0, h);
+  }
+}
+
+class ConstraintScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    let b0, b1;
+    b0 = Box(2, 1, 0.1).setPos(3, 1.5, 1).addTo(this);
+    b1 = Box(2, 0.1, 1).setPos(3, 2, 0.4).addTo(this).setStatic();
+    this.world.addConstraint(
+      new Constraint(b0, b1).add(new Attachment(new Vec3(0, 0, 0.5), new Vec3(0, 0.6, 0))).add(new AlignAxes())
+      // .add(new AlignOrientation)
+    );
+    this.world.addConstraint(
+      new Constraint(b0, b1).add(new Attachment(new Vec3(0, 0, 0.5), new Vec3(0, 0.6, 0)))
+      // .add(new AlignAxes)
+      // .add(new AlignOrientation)
+    );
+    b0 = Box(1).setPos(-3, 3, 0).addTo(this);
+    b1 = Box(1).setPos(-3, 2, 2).addTo(this);
+    this.world.addConstraint(
+      new Constraint(b0, b1).add(
+        new Attachment(
+          new Vec3(0, 1, 0),
+          new Vec3(0, 1, 0)
+        ).setCompliance(0.01).setDamping(5, 5)
+      )
+    );
+    this.addGround();
+  }
+  update(time, dt, keys) {
+    if (keys.KeyA) {
+      const body = this.world.bodies[0];
+      const tetraPointL = new Vec3(0, 0, 0);
+      const tetraPointW = body.localToWorld(tetraPointL);
+      const strength = 3;
+      body.applyForceW(
+        new Vec3(0, 0, body.mass * this.world.gravity.y * -strength),
+        tetraPointW
+      );
+    }
+  }
+}
+
+class BaseDebugScene extends Scene {
+  constructor() {
+    super();
+    const ground = new Mesh(
+      new PlaneGeometry(50, 50, 5, 5),
+      new MeshPhongMaterial({
+        color: 4473924,
+        wireframe: true
+      })
+    );
+    ground.receiveShadow = true;
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.z = 0;
+    this.add(ground);
+    const p1 = new PointLight(this, 15916485);
+    p1.light.castShadow = true;
+    p1.light.position.set(-7, 10, 3);
+    const p2 = new PointLight(this, 14081773);
+    p2.light.castShadow = true;
+    p2.light.position.set(7, 10, -3);
+    const ambientLight = new AmbientLight(16777215, 0.35);
+    this.add(ambientLight);
+  }
+}
+
+class DebugScene extends BaseScene {
+  init() {
+    const lookAt = new Vec3(0, 0, 0);
+    this.camera.lookAt(lookAt);
+    this.orbitControls.target.copy(lookAt);
+    this.orbitControls.update();
+    this.insert(new BaseDebugScene());
+    Box(3, 1, 3).setWireframe(true).setPos(0, 0.5, 0).addTo(this);
+    Box(2, 1, 1).setWireframe(true).setPos(1.5, 5, 0).addTo(this);
+    this.addGround();
+  }
+}
+
+class DominosScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    for (let i = 0; i < 20; i++) {
+      const b = Box(1, 2, 0.2).setPos(0, 1, -i * 1).setFriction(1, 1).addTo(this);
+      if (i == 0)
+        b.omega.x = -1;
+    }
+    for (let i = 0; i < 10; i++) {
+      const size = 1 + i * 0.5;
+      const b = Box(1 * size, 2 * size, 0.4 * size / 2).setPos(-7, 1 * size, -i * Math.pow(size, 0.5) * 1).setFriction(0.7, 0.7).addTo(this);
+      if (i == 0)
+        b.omega.x = -1;
+    }
+    this.addGround();
+  }
+}
+
+class RopeScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    const bodies = [];
+    for (let i = 0; i < 20; i++) {
+      const b = Box(0.1, 0.1, 0.4).setPos(0, 7, i).addTo(this);
+      if (i == 0)
+        b.setStatic();
+      bodies.push(b);
+    }
+    for (let i = 1; i < bodies.length; i++) {
+      this.world.addConstraint(
+        new Constraint(bodies[i], bodies[i - 1]).add(
+          new Attachment(
+            new Vec3(0, 0, -0.23),
+            new Vec3(0, 0, 0.23)
+          ).setCompliance(0.01).setDamping(300)
+        )
+        // .add(new AlignOrientation().setCompliance(0.05))
+      );
+    }
+    this.addGround();
+  }
+  update(time, dt, keys) {
+    if (keys.KeyA) {
+      const body = this.world.bodies[0];
+      const tetraPointL = new Vec3(0, 0, 0);
+      const tetraPointW = body.localToWorld(tetraPointL);
+      const strength = 3;
+      body.applyForceW(
+        new Vec3(0, 0, body.mass * this.world.gravity.y * -strength),
+        tetraPointW
+      );
+    }
+  }
+}
+
+class OmgScene extends Scene {
+  constructor() {
+    super();
+    this.background = new Color$1(3362125);
+    const ground = new Mesh(
+      new PlaneGeometry(100, 100),
+      new MeshPhongMaterial({
+        color: 3362125
+      })
+    );
+    ground.receiveShadow = true;
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.z = 0;
+    this.add(ground);
+    const p1 = new PointLight(this, 15916485);
+    p1.light.castShadow = true;
+    p1.light.position.set(7, 10, 3);
+    const p2 = new PointLight(this, 14081773);
+    p2.light.castShadow = true;
+    p2.light.position.set(-7, 10, -3);
+    const ambientLight = new AmbientLight(13421772);
+    this.add(ambientLight);
+  }
+}
+
+class StackedBoxesScene extends BaseScene {
+  init() {
+    const lookAt = new Vec3(0, 0, 0);
+    this.camera.lookAt(lookAt);
+    this.orbitControls.target.copy(lookAt);
+    this.orbitControls.update();
+    this.insert(new OmgScene());
+    const d = 1;
+    for (let i = 0; i < 5; i++) {
+      Box(d).setPos(3, d - d / 2 + 0.05 + d * i, 0).addTo(this);
+    }
+    this.addGround();
+  }
+}
+
 function Tetra(size = 1) {
   const tetraMesh = new Mesh(
     new TetrahedronGeometry(size, 0),
@@ -38646,25 +38342,14 @@ function Tetra(size = 1) {
   return tetra;
 }
 
-class MyScene extends BaseScene {
-  constructor() {
-    super();
-  }
+class TestingScene extends BaseScene {
   init() {
-    const lookAt = new Vec3(0, 0, 0);
-    this.camera.lookAt(lookAt);
-    this.orbitControls.target.copy(lookAt);
-    this.orbitControls.update();
     this.insert(new BaseLightingScene());
-    this.addGeometry();
-  }
-  addGeometry() {
     Box(3, 1, 3).setPos(0, 0.5, 0).addTo(this);
     Box(2, 1, 1).setPos(1.5, 10, 0).addTo(this);
     Tetra(1).setPos(-3, 4, 5).setVel(0, 2.5, -5).setOmega(1, 10, 1).addTo(this);
-    for (let i = 0; i < 20; i++) {
-      const size = 1;
-      Box(1 * size, 2 * size, 0.4 * size / 2).setPos(-3, 1 * size, -i * Math.pow(size, 0.5) * 1).setFriction(0.7, 0.7).addTo(this);
+    for (let i = 0; i < 14; i++) {
+      Box(1, 2, 0.2).setPos(-3, 1, -i * 1).setFriction(1, 1).addTo(this);
     }
     const customMesh = new Mesh(
       // new THREE.SphereGeometry(0.5, 22, 22),
@@ -38720,22 +38405,6 @@ class MyScene extends BaseScene {
       );
     }
   }
-  addGround() {
-    const ground = new RigidBody(
-      new PlaneCollider(new Vector2(100, 100)),
-      new Mesh(
-        new PlaneGeometry(0.1, 0.1, 5, 5),
-        new MeshPhongMaterial({
-          color: 16777215
-          // wireframe: true,
-        })
-      )
-    );
-    ground.pose.q.setFromEuler(new Euler(-Math.PI / 2, 0, 0));
-    ground.pose.p.copy(new Vec3(0, 0, 0));
-    ground.setStatic();
-    this.addBody(ground);
-  }
 }
 
 const style = '';
@@ -38743,8 +38412,18 @@ const style = '';
 const game = new Game("canvas");
 window.game = game;
 async function init() {
-  const scene = new MyScene();
-  game.add(scene);
+  Game.sceneSelector = {
+    current: "Playground",
+    options: {
+      "Playground": TestingScene,
+      "Dominos": DominosScene,
+      "StackedBoxes": StackedBoxesScene,
+      "Constraints": ConstraintScene,
+      "Rope": RopeScene,
+      "Debug": DebugScene
+    }
+  };
+  Game.changeScene(Game.sceneSelector.options[Game.sceneSelector.current]);
   update(0);
 }
 function update(time) {
