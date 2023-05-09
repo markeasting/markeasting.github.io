@@ -36519,7 +36519,8 @@ class Collider {
   uniqueIndices = [];
   // relativePos: Vec3 = new Vec3(0.0, 0.0, 0.0);
   aabb = new Box3();
-  aabbHelper = new Box3Helper(this.aabb);
+  expanded_aabb = new Box3();
+  aabbHelper = new Box3Helper(this.expanded_aabb);
   updateGlobalPose(pose) {
   }
   /* GJK */
@@ -37145,7 +37146,7 @@ class GjkEpa {
 }
 
 class XPBDSolver extends BaseSolver {
-  numSubsteps = 15;
+  numSubsteps = 20;
   narrowPhase = new GjkEpa();
   static h = 0;
   collisionCount = 0;
@@ -37175,6 +37176,7 @@ class XPBDSolver extends BaseSolver {
       this.solveVelocities(contacts, h);
     }
     for (const body of bodies) {
+      body.collider.expanded_aabb.copy(body.collider.aabb).expandByScalar(2 * dt * body.vel.length());
       body.force.set(0, 0, 0);
       body.torque.set(0, 0, 0);
       body.updateGeometry();
@@ -37184,14 +37186,18 @@ class XPBDSolver extends BaseSolver {
     const collisions = [];
     for (let i = 0; i < bodies.length; i++) {
       const A = bodies[i];
+      if (!A.canCollide)
+        continue;
       for (let j = i + 1; j < bodies.length; j++) {
         const B = bodies[j];
+        if (!B.canCollide)
+          continue;
         if (!A.isDynamic && !B.isDynamic)
           continue;
         if (A.id == B.id)
           continue;
-        const aabb1 = A.collider.aabb.clone().expandByScalar(2 * dt * A.vel.length());
-        const aabb2 = B.collider.aabb.clone().expandByScalar(2 * dt * B.vel.length());
+        const aabb1 = A.collider.expanded_aabb;
+        const aabb2 = B.collider.expanded_aabb;
         switch (A.collider.colliderType) {
           case ColliderType.ConvexMesh:
             switch (B.collider.colliderType) {
@@ -37734,6 +37740,7 @@ class RigidBody {
   restitution = 0.4;
   // coefficient of restitution (e)
   isDynamic = true;
+  canCollide = true;
   static maxRotationPerSubstep = 0.5;
   constructor(collider, mesh) {
     this.collider = collider;
@@ -37797,6 +37804,10 @@ class RigidBody {
   setFriction(staticFriction, dynamicFriction) {
     this.staticFriction = staticFriction;
     this.dynamicFriction = dynamicFriction;
+    return this;
+  }
+  setCanCollide(canCollide = true) {
+    this.canCollide = canCollide;
     return this;
   }
   setStatic() {
@@ -37972,7 +37983,7 @@ class BaseScene {
       this.orbitControls.target.copy(state.target);
       this.orbitControls.update();
     } else {
-      const lookAt = new Vec3(0, 0, 0);
+      const lookAt = new Vec3(0, 2, 0);
       this.camera.lookAt(lookAt);
       this.camera.position.set(5, 5, 5);
       this.orbitControls.target.copy(lookAt);
@@ -38115,10 +38126,11 @@ class Constraint {
   body1;
   constraints = [];
   constructor(body0, body1) {
-    if (body0.id == body1.id)
+    if (body0.id == body1?.id)
       throw new Error("Cannot create a constraint for the same body");
     this.body0 = body0;
-    this.body1 = body1;
+    if (body1)
+      this.body1 = body1;
   }
   add(constraint) {
     this.constraints.push(constraint);
@@ -38224,10 +38236,6 @@ class BaseDebugScene extends Scene {
 
 class DebugScene extends BaseScene {
   init() {
-    const lookAt = new Vec3(0, 0, 0);
-    this.camera.lookAt(lookAt);
-    this.orbitControls.target.copy(lookAt);
-    this.orbitControls.update();
     this.insert(new BaseDebugScene());
     Box(3, 1, 3).setWireframe(true).setPos(0, 0.5, 0).addTo(this);
     Box(2, 1, 1).setWireframe(true).setPos(1.5, 5, 0).addTo(this);
@@ -38253,40 +38261,69 @@ class DominosScene extends BaseScene {
   }
 }
 
+class PendulumScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    const bodies = [];
+    const l = 1;
+    const height = 3;
+    for (let i = 0; i < 3; i++) {
+      const b = Box(0.1, 0.1, l).setPos(0, height, i * l + l / 2).setOmega(70, 0, 0).setCanCollide(false).addTo(this);
+      bodies.push(b);
+    }
+    for (let i = 1; i < bodies.length; i += 1) {
+      this.world.addConstraint(
+        new Constraint(bodies[i], bodies[i - 1]).add(
+          new Attachment(
+            new Vec3(0, 0, l / 2),
+            new Vec3(0, 0, -l / 2)
+          )
+        )
+        // .add(new AlignAxes())
+      );
+    }
+    this.world.addConstraint(
+      new Constraint(bodies[0]).add(
+        new Attachment(
+          new Vec3(0, height, 0),
+          new Vec3(0, 0, -l / 2)
+        )
+      )
+    );
+    this.addGround();
+  }
+}
+
 class RopeScene extends BaseScene {
   init() {
     this.insert(new BaseLightingScene());
     const bodies = [];
-    for (let i = 0; i < 20; i++) {
-      const b = Box(0.1, 0.1, 0.4).setPos(0, 7, i).addTo(this);
-      if (i == 0)
-        b.setStatic();
+    const l = 0.3;
+    const height = 5;
+    for (let i = 0; i < 30; i++) {
+      const b = Box(0.05, 0.05, l).setPos(0, height, i * l + l / 2).addTo(this);
       bodies.push(b);
     }
     for (let i = 1; i < bodies.length; i++) {
       this.world.addConstraint(
         new Constraint(bodies[i], bodies[i - 1]).add(
           new Attachment(
-            new Vec3(0, 0, -0.23),
-            new Vec3(0, 0, 0.23)
-          ).setCompliance(0.01).setDamping(300)
+            new Vec3(0, 0, l / 2 * 1.2),
+            new Vec3(0, 0, -l / 2)
+          ).setCompliance(0).setDamping(500)
         )
-        // .add(new AlignOrientation().setCompliance(0.05))
+        // .add(new AlignOrientation().setCompliance(20))
       );
     }
+    this.world.addConstraint(
+      new Constraint(bodies[0]).add(
+        new Attachment(
+          new Vec3(0, height, 0),
+          new Vec3(0, 0, -l / 2)
+        )
+      )
+    );
     this.addGround();
-  }
-  update(time, dt, keys) {
-    if (keys.KeyA) {
-      const body = this.world.bodies[0];
-      const tetraPointL = new Vec3(0, 0, 0);
-      const tetraPointW = body.localToWorld(tetraPointL);
-      const strength = 3;
-      body.applyForceW(
-        new Vec3(0, 0, body.mass * this.world.gravity.y * -strength),
-        tetraPointW
-      );
-    }
   }
 }
 
@@ -38317,14 +38354,10 @@ class OmgScene extends Scene {
 
 class StackedBoxesScene extends BaseScene {
   init() {
-    const lookAt = new Vec3(0, 0, 0);
-    this.camera.lookAt(lookAt);
-    this.orbitControls.target.copy(lookAt);
-    this.orbitControls.update();
     this.insert(new OmgScene());
     const d = 1;
     for (let i = 0; i < 5; i++) {
-      Box(d).setPos(3, d - d / 2 + 0.05 + d * i, 0).addTo(this);
+      Box(d).setPos(0, d - d / 2 + 0.05 + d * i, 0).addTo(this);
     }
     this.addGround();
   }
@@ -38342,13 +38375,13 @@ function Tetra(size = 1) {
   return tetra;
 }
 
-class TestingScene extends BaseScene {
+class PlayGroundScene extends BaseScene {
   init() {
     this.insert(new BaseLightingScene());
     Box(3, 1, 3).setPos(0, 0.5, 0).addTo(this);
     Box(2, 1, 1).setPos(1.5, 10, 0).addTo(this);
     Tetra(1).setPos(-3, 4, 5).setVel(0, 2.5, -5).setOmega(1, 10, 1).addTo(this);
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 7; i++) {
       Box(1, 2, 0.2).setPos(-3, 1, -i * 1).setFriction(1, 1).addTo(this);
     }
     const customMesh = new Mesh(
@@ -38409,17 +38442,75 @@ class TestingScene extends BaseScene {
 
 const style = '';
 
+class AlignOrientation extends BaseConstraint {
+  solvePos(h) {
+    this.updateGlobalPoses();
+    const q = this.globalPose0.q;
+    q.conjugate();
+    q.multiplyQuaternions(this.globalPose1.q, q);
+    const omega = new Vec3(2 * q.x, 2 * q.y, 2 * q.z);
+    if (q.w < 0)
+      omega.set(-omega.x, -omega.y, -omega.z);
+    this.lambda = XPBDSolver.applyBodyPairCorrection(this.body0, this.body1, omega, this.compliance, h);
+  }
+}
+
+class DragonTailScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    const bodies = [];
+    const l = 0.5;
+    const s = 0.028;
+    const height = 7;
+    for (let i = 0; i < 12; i++) {
+      const a = l - i * s;
+      const b2 = Box(a).setPos(0, height, i * l + l / 2).addTo(this);
+      bodies.push(b2);
+    }
+    for (let i = 1; i < bodies.length; i++) {
+      this.world.addConstraint(
+        new Constraint(bodies[i], bodies[i - 1]).add(
+          new Attachment(
+            new Vec3(0, 0, l / 2),
+            new Vec3(0, 0, -l / 2)
+          ).setCompliance(0).setDamping(1e3)
+        ).add(new AlignOrientation().setCompliance(0.2))
+      );
+    }
+    const b = Tetra(0.5).setPos(0, height, bodies.length * l - 0.5).addTo(this);
+    this.world.addConstraint(
+      new Constraint(b, bodies[bodies.length - 1]).add(
+        new Attachment(
+          new Vec3(0, 0, 0.5),
+          new Vec3(0, 0, 0)
+        ).setCompliance(0).setDamping(500)
+      ).add(new AlignOrientation().setCompliance(0))
+    );
+    this.world.addConstraint(
+      new Constraint(bodies[0]).add(
+        new Attachment(
+          new Vec3(0, height, 0),
+          new Vec3(0, 0, -l / 2)
+        ).setDamping(600)
+      )
+    );
+    this.addGround();
+  }
+}
+
 const game = new Game("canvas");
 window.game = game;
 async function init() {
   Game.sceneSelector = {
     current: "Playground",
     options: {
-      "Playground": TestingScene,
+      "Playground": PlayGroundScene,
       "Dominos": DominosScene,
       "StackedBoxes": StackedBoxesScene,
       "Constraints": ConstraintScene,
       "Rope": RopeScene,
+      "DragonTail": DragonTailScene,
+      "Pendulum": PendulumScene,
       "Debug": DebugScene
     }
   };
