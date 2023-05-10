@@ -33594,7 +33594,7 @@ class Game {
   static mouseDrag = false;
   static keys = {};
   static scene = void 0;
-  static sceneSelector = {};
+  static sceneSelector;
   static debugOverlay = true;
   static stepPhysics = false;
   dt = 0;
@@ -33639,9 +33639,8 @@ class Game {
     if (Game.scene)
       Game.scene.onResize(width, height);
   }
-  static setSceneSelector(selector) {
-    if (selector)
-      Game.sceneSelector = selector;
+  static setSceneSelector(obj) {
+    Game.sceneSelector = obj;
   }
   static changeScene(scene) {
     Game._gui.destroy();
@@ -33652,15 +33651,16 @@ class Game {
       "solver": Game._gui.addFolder("Solver"),
       "debug": Game._gui.addFolder("Debugging")
     };
-    Game.gui.physics.add(Game, "stepPhysics").name("Step physics");
     Game.gui.scene.open();
     Game.gui.scene.add(
       Game.sceneSelector,
       "current",
       Object.keys(Game.sceneSelector.options)
     ).name("Select demo").onChange((val) => {
+      Game.sceneSelector.current = val;
       Game.changeScene(Game.sceneSelector.options[val]);
     });
+    window.location.hash = Game.sceneSelector.current;
     Game.scene = new scene();
     if (!Game.scene.initialized) {
       Game.scene.init();
@@ -36810,7 +36810,7 @@ class Support {
 }
 
 class GjkEpa {
-  static MAX_GJK_ITERS = 32;
+  static MAX_GJK_ITERS = 16;
   static MAX_EPA_ITERS = 16;
   debugMinkowski;
   debugSimplex;
@@ -36818,14 +36818,14 @@ class GjkEpa {
   debugNormal = new ArrowHelper();
   debug = false;
   constructor() {
-    Game.gui.solver.add(this, "debug").name("Debug GJK / EPA");
+    Game.gui.debug.add(this, "debug").name("Debug GJK / EPA");
   }
   GJK(colliderA, colliderB) {
     const support = this.support(colliderA, colliderB, new Vec3(0, 1, 0));
     const simplex = new Simplex();
     simplex.push_front(support);
     const direction = support.point.clone().negate();
-    while (GjkEpa.MAX_GJK_ITERS) {
+    for (let i = 0; i < GjkEpa.MAX_GJK_ITERS; i++) {
       const support2 = this.support(colliderA, colliderB, direction);
       if (support2.point.dot(direction) <= 0)
         return;
@@ -36834,6 +36834,7 @@ class GjkEpa {
         return simplex;
       }
     }
+    return;
   }
   /**
    * Returns the vertex on the Minkowski difference
@@ -36962,6 +36963,7 @@ class GjkEpa {
       minNormal.set(normals[minFace].x, normals[minFace].y, normals[minFace].z);
       minDistance = normals[minFace].w;
       if (iterations++ > GjkEpa.MAX_EPA_ITERS) {
+        console.error("Too many EPA iterations");
         break;
       }
       const witnessA = colliderA.findFurthestPoint(minNormal);
@@ -37152,6 +37154,7 @@ class XPBDSolver extends BaseSolver {
   collisionCount = 0;
   constructor() {
     super();
+    Game.gui.solver.add(Game, "stepPhysics").name("Step (space)");
     Game.gui.solver.add(this, "numSubsteps", 1, 30);
     Game.gui.solver.add(this, "collisionCount").listen();
   }
@@ -37775,6 +37778,13 @@ class RigidBody {
       this.mesh.material.wireframe = true;
     return this;
   }
+  setRandomColor() {
+    if (this.mesh) {
+      const mat = this.mesh.material;
+      mat.color = new Color$1().setHSL(Math.random(), 1, 0.7);
+    }
+    return this;
+  }
   setPos(x, y, z) {
     this.pose.p.set(x, y, z);
     this.prevPose.copy(this.pose);
@@ -38096,7 +38106,7 @@ class BaseLightingScene extends Scene {
   }
 }
 
-function Box(width = 1, height, depth) {
+function Box(width = 1, height, depth, density) {
   if (!height)
     height = width;
   if (!depth)
@@ -38117,7 +38127,7 @@ function Box(width = 1, height, depth) {
     //     wireframeLinewidth: 2
     // })
   );
-  const box = new RigidBody(new MeshCollider().setGeometry(boxMesh.geometry)).setMesh(boxMesh).setBox(new Vec3(width, height, depth), 1);
+  const box = new RigidBody(new MeshCollider().setGeometry(boxMesh.geometry)).setMesh(boxMesh).setBox(new Vec3(width, height, depth), density);
   return box;
 }
 
@@ -38301,7 +38311,7 @@ class RopeScene extends BaseScene {
     const l = 0.3;
     const height = 5;
     for (let i = 0; i < 30; i++) {
-      const b = Box(0.05, 0.05, l).setPos(0, height, i * l + l / 2).addTo(this);
+      const b = Box(0.05, 0.05, l, 50).setPos(0, height, i * l + l / 2).addTo(this);
       bodies.push(b);
     }
     for (let i = 1; i < bodies.length; i++) {
@@ -38380,9 +38390,10 @@ class PlayGroundScene extends BaseScene {
     this.insert(new BaseLightingScene());
     Box(3, 1, 3).setPos(0, 0.5, 0).addTo(this);
     Box(2, 1, 1).setPos(1.5, 10, 0).addTo(this);
-    Tetra(1).setPos(-3, 4, 5).setVel(0, 2.5, -5).setOmega(1, 10, 1).addTo(this);
-    for (let i = 0; i < 7; i++) {
-      Box(1, 2, 0.2).setPos(-3, 1, -i * 1).setFriction(1, 1).addTo(this);
+    Tetra(1).setPos(-3, 4, 8).setVel(0, 2.5, -10).setOmega(1, 10, 1).addTo(this);
+    const h = 1;
+    for (let i = 0; i < 6; i++) {
+      Box(h).setPos(-3, h - h / 2 + 0.05 + h * i, 0).addTo(this);
     }
     const customMesh = new Mesh(
       // new THREE.SphereGeometry(0.5, 22, 22),
@@ -38413,7 +38424,7 @@ class PlayGroundScene extends BaseScene {
     );
     new RigidBody(
       new MeshCollider().setGeometry(coinMesh.geometry)
-    ).setMesh(coinMesh).setPos(0, 1.5, 5).setRotation(1.8, 0, 0).setOmega(0, 15, 0).setFriction(0.9, 0.5).setRestitution(0.85).setCylinder(coinSize.x, coinSize.y, 1).addTo(this);
+    ).setMesh(coinMesh).setPos(0, 1.5, 5).setRotation(2.5, 0, 0).setOmega(0, 15, 0).setFriction(0.8, 0.5).setRestitution(0.6).setCylinder(coinSize.x, coinSize.y, 1).addTo(this);
     this.addGround();
   }
   update(time, dt, keys) {
@@ -38440,8 +38451,6 @@ class PlayGroundScene extends BaseScene {
   }
 }
 
-const style = '';
-
 class AlignOrientation extends BaseConstraint {
   solvePos(h) {
     this.updateGlobalPoses();
@@ -38464,7 +38473,7 @@ class DragonTailScene extends BaseScene {
     const height = 7;
     for (let i = 0; i < 12; i++) {
       const a = l - i * s;
-      const b2 = Box(a).setPos(0, height, i * l + l / 2).addTo(this);
+      const b2 = Box(a, a, a, 50).setPos(0, height, i * l + l / 2).addTo(this);
       bodies.push(b2);
     }
     for (let i = 1; i < bodies.length; i++) {
@@ -38498,10 +38507,24 @@ class DragonTailScene extends BaseScene {
   }
 }
 
+class StressTestScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    let d = 1;
+    for (let i = 0; i < 128; i++) {
+      const b = Box(d);
+      b.setRandomColor().setPos(0, d + i * 2, 0).addTo(this);
+    }
+    this.addGround();
+  }
+}
+
+const style = '';
+
 const game = new Game("canvas");
 window.game = game;
 async function init() {
-  Game.sceneSelector = {
+  Game.setSceneSelector({
     current: "Playground",
     options: {
       "Playground": PlayGroundScene,
@@ -38511,9 +38534,13 @@ async function init() {
       "Rope": RopeScene,
       "DragonTail": DragonTailScene,
       "Pendulum": PendulumScene,
+      "StressTest": StressTestScene,
       "Debug": DebugScene
     }
-  };
+  });
+  const url = window.location.hash.substring(1);
+  if (url in Game.sceneSelector.options)
+    Game.sceneSelector.current = url;
   Game.changeScene(Game.sceneSelector.options[Game.sceneSelector.current]);
   update(0);
 }
