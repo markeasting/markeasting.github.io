@@ -29157,6 +29157,20 @@ class LineSegments extends Line {
 
 }
 
+class LineLoop extends Line {
+
+	constructor( geometry, material ) {
+
+		super( geometry, material );
+
+		this.isLineLoop = true;
+
+		this.type = 'LineLoop';
+
+	}
+
+}
+
 class CylinderGeometry extends BufferGeometry {
 
 	constructor( radiusTop = 1, radiusBottom = 1, height = 1, radialSegments = 32, heightSegments = 1, openEnded = false, thetaStart = 0, thetaLength = Math.PI * 2 ) {
@@ -33647,8 +33661,9 @@ class Game {
     Game._gui = new GUI$1();
     Game.gui = {
       "scene": Game._gui.addFolder("Scene"),
-      "physics": Game._gui.addFolder("Physics"),
-      "solver": Game._gui.addFolder("Solver"),
+      // 'sceneOptions': Game._gui.addFolder('Scene Options'),
+      "physics": Game._gui.addFolder("Physics world"),
+      "solver": Game._gui.addFolder("Physics solver"),
       "debug": Game._gui.addFolder("Debugging")
     };
     Game.gui.scene.open();
@@ -33660,11 +33675,25 @@ class Game {
       Game.sceneSelector.current = val;
       Game.changeScene(Game.sceneSelector.options[val]);
     });
+    Game.gui.scene.add({ restart: () => {
+      if (Game.scene) {
+        Game.scene.destroy();
+        Game._gui.removeFolder(Game.scene.gui);
+        Game.scene.gui = Game._gui.addFolder("Scene Options");
+        Game.scene.init();
+      }
+    } }, "restart").name("Restart");
     window.location.hash = Game.sceneSelector.current;
+    if (Game.scene) {
+      Game.scene.onDeactivate();
+      Game.scene.destroy();
+    }
     Game.scene = new scene();
     if (!Game.scene.initialized) {
-      Game.scene.init();
+      Game.scene.gui = Game._gui.addFolder("Scene Options");
       Game.scene.initialized = true;
+      Game.scene.init();
+      Game.scene.onActivate();
     }
     Game.fitContent();
     Game.setupRenderPass();
@@ -34994,9 +35023,7 @@ class Vec3 extends Vector3 {
 
 class Pose {
   p;
-  // = new Vec3(0.0, 0.0, 0.0);
   q;
-  // = new Quat(1.0, 0.0, 0.0, 0.0);
   constructor(p = new Vec3(0, 0, 0), q = new Quaternion()) {
     this.p = p.clone();
     this.q = q.clone();
@@ -35035,6 +35062,15 @@ class Pose {
     pose.p.add(this.p);
   }
 }
+
+let Face$1 = class Face {
+  constructor(vertices, indices, center, normal) {
+    this.vertices = vertices;
+    this.indices = indices;
+    this.center = center;
+    this.normal = normal;
+  }
+};
 
 /**
  * Ported from: https://github.com/maurizzzio/quickhull3d/ by Mauricio Poppe (https://github.com/maurizzzio)
@@ -36551,6 +36587,7 @@ class PlaneCollider extends Collider {
 class MeshCollider extends Collider {
   colliderType = 3 /* ConvexMesh */;
   convexHull;
+  faces = [];
   setGeometry(geometry) {
     let strippedGeometry = geometry.clone().deleteAttribute("normal").deleteAttribute("uv");
     strippedGeometry = mergeVertices(strippedGeometry);
@@ -36577,6 +36614,19 @@ class MeshCollider extends Collider {
       this.vertices.push(vertex);
       this.indices.push(i);
       this.uniqueIndices.push(i);
+    }
+    for (let i = 0; i < this.vertices.length; i += 3) {
+      const a = this.vertices[i + 0];
+      const b = this.vertices[i + 1];
+      const c = this.vertices[i + 2];
+      const center = new Vec3().addVectors(a, b).add(c).divideScalar(3);
+      const normal = new Vec3().subVectors(b, a).cross(c.clone().sub(a)).normalize();
+      this.faces.push(new Face$1(
+        [a, b, c],
+        [i + 0, i + 1, i + 2],
+        center,
+        normal
+      ));
     }
     for (let i = 0; i < this.vertices.length; i++) {
       this.verticesWorldSpace[i] = this.vertices[i].clone();
@@ -36615,6 +36665,11 @@ class CollisionPair {
     this.B = B;
     if (A === B || A.id == B.id)
       throw new Error("Cannot create a CollisionPair with the same body");
+    const vrel = Vec3.sub(A.vel, B.vel).lengthSq();
+    if (vrel > 0.01) {
+      A.wake();
+      B.wake();
+    }
   }
 }
 
@@ -36683,9 +36738,10 @@ class ContactSet {
       this.B.getVelocityAt(this.p2)
     );
     this.vn = this.vrel.dot(this.n);
-    this.e = 0.5 * (A.restitution + B.restitution);
-    this.staticFriction = 0.5 * (A.staticFriction + B.staticFriction);
-    this.dynamicFriction = 0.5 * (A.dynamicFriction + B.dynamicFriction);
+    this.e = (A.restitution + B.restitution) / 2;
+    this.staticFriction = (A.staticFriction + B.staticFriction) / 2;
+    this.dynamicFriction = (A.dynamicFriction + B.dynamicFriction) / 2;
+    this.update();
   }
   update() {
     const A = this.A;
@@ -36809,16 +36865,168 @@ class Support {
   }
 }
 
+const inside = (cp1, cp2, p) => {
+  return (cp2.x - cp1.x) * (p.y - cp1.y) > (cp2.y - cp1.y) * (p.x - cp1.x);
+};
+const intersection = (cp1, cp2, s, e) => {
+  const dc = {
+    x: cp1.x - cp2.x,
+    y: cp1.y - cp2.y
+  };
+  const dp = {
+    x: s.x - e.x,
+    y: s.y - e.y
+  };
+  const n1 = cp1.x * cp2.y - cp1.y * cp2.x;
+  const n2 = s.x * e.y - s.y * e.x;
+  const n3 = 1 / (dc.x * dp.y - dc.y * dp.x);
+  return new Vector2(
+    (n1 * dp.x - n2 * dc.x) * n3,
+    (n1 * dp.y - n2 * dc.y) * n3
+  );
+};
+function polygonArea(vertices) {
+  const numVertices = vertices.length;
+  if (numVertices < 3)
+    return 0;
+  let area = 0;
+  for (let i = 0; i < numVertices; i++) {
+    const currentVertex = vertices[i];
+    const nextVertex = vertices[(i + 1) % numVertices];
+    area += currentVertex.x * nextVertex.y - currentVertex.y * nextVertex.x;
+  }
+  area = Math.abs(area) / 2;
+  return area;
+}
+const SutherlandHodgmanClipping = (subjectPolygon, clipPolygon) => {
+  const subjectArea = polygonArea(subjectPolygon);
+  const clipArea = polygonArea(clipPolygon);
+  if (clipArea > subjectArea) {
+    const temp = subjectPolygon;
+    subjectPolygon = clipPolygon;
+    clipPolygon = temp;
+  }
+  let cp1 = clipPolygon[clipPolygon.length - 1];
+  let cp2;
+  let s;
+  let e;
+  let outputList = subjectPolygon;
+  for (const j in clipPolygon) {
+    cp2 = clipPolygon[j];
+    let inputList = outputList;
+    outputList = [];
+    s = inputList[inputList.length - 1];
+    for (const i in inputList) {
+      e = inputList[i];
+      if (inside(cp1, cp2, e)) {
+        if (!inside(cp1, cp2, s)) {
+          outputList.push(intersection(cp1, cp2, s, e));
+        }
+        outputList.push(e);
+      } else if (inside(cp1, cp2, s)) {
+        outputList.push(intersection(cp1, cp2, s, e));
+      }
+      s = e;
+    }
+    cp1 = cp2;
+  }
+  return outputList;
+};
+
+const X = 0;
+const Y = 1;
+const REMOVED = -1;
+class GrahamScan {
+  points = [];
+  constructor() {
+    this.points = [];
+  }
+  setPoints(points) {
+    this.points = points.map((v) => v.toArray());
+    return this;
+  }
+  getHull() {
+    const pivot = this.preparePivotPoint();
+    let indexes = Array.from(this.points, (point, i) => i);
+    const angles = Array.from(this.points, (point) => this.getAngle(pivot, point));
+    const distances = Array.from(this.points, (point) => this.euclideanDistanceSquared(pivot, point));
+    indexes.sort((i, j) => {
+      const angleA = angles[i];
+      const angleB = angles[j];
+      if (angleA === angleB) {
+        const distanceA = distances[i];
+        const distanceB = distances[j];
+        return distanceA - distanceB;
+      }
+      return angleA - angleB;
+    });
+    for (let i = 1; i < indexes.length - 1; i++) {
+      if (angles[indexes[i]] === angles[indexes[i + 1]]) {
+        indexes[i] = REMOVED;
+      }
+    }
+    const hull = [];
+    for (let i = 0; i < indexes.length; i++) {
+      const index = indexes[i];
+      const point = this.points[index];
+      if (index !== REMOVED) {
+        if (hull.length < 3) {
+          hull.push(point);
+        } else {
+          while (this.checkOrientation(hull[hull.length - 2], hull[hull.length - 1], point) > 0) {
+            hull.pop();
+          }
+          hull.push(point);
+        }
+      }
+    }
+    return hull.length < 3 ? [] : hull.map((v) => new Vector2(v[0], v[1]));
+  }
+  /**
+   * Check the orientation of 3 points in the order given.
+   *
+   * It works by comparing the slope of P1->P2 vs P2->P3. If P1->P2 > P2->P3, orientation is clockwise; if
+   * P1->P2 < P2->P3, counter-clockwise. If P1->P2 == P2->P3, points are co-linear.
+   */
+  checkOrientation(p1, p2, p3) {
+    return (p2[Y] - p1[Y]) * (p3[X] - p2[X]) - (p3[Y] - p2[Y]) * (p2[X] - p1[X]);
+  }
+  getAngle(a, b) {
+    return Math.atan2(b[Y] - a[Y], b[X] - a[X]);
+  }
+  euclideanDistanceSquared(p1, p2) {
+    const a = p2[X] - p1[X];
+    const b = p2[Y] - p1[Y];
+    return a * a + b * b;
+  }
+  preparePivotPoint() {
+    let pivot = this.points[0];
+    for (let i = 1; i < this.points.length; i++) {
+      const point = this.points[i];
+      if (point[Y] < pivot[Y] || point[Y] === pivot[Y] && point[X] < pivot[X]) {
+        pivot = point;
+      }
+    }
+    return pivot;
+  }
+}
+
 class GjkEpa {
   static MAX_GJK_ITERS = 16;
   static MAX_EPA_ITERS = 16;
   debugMinkowski;
   debugSimplex;
   debugPolytope;
+  debugFaceA;
+  debugFaceB;
+  debugFaceAClipped;
+  debugFaceBClipped;
   debugNormal = new ArrowHelper();
-  debug = false;
+  debugEPA = false;
+  debugClipping = false;
   constructor() {
-    Game.gui.debug.add(this, "debug").name("Debug GJK / EPA");
+    Game.gui.debug.add(this, "debugEPA").name("Debug GJK / EPA");
+    Game.gui.debug.add(this, "debugClipping").name("Debug clipping");
   }
   GJK(colliderA, colliderB) {
     const support = this.support(colliderA, colliderB, new Vec3(0, 1, 0));
@@ -36929,11 +37137,27 @@ class GjkEpa {
     return true;
   }
   /**
-   * EPA algorithm
+   * EPA (Expanding Polytope Algorithm)
    * 
    * https://github.com/IainWinter/IwEngine/blob/master/IwEngine/src/physics/impl/GJK.cpp
    */
-  EPA(simplex, colliderA, colliderB) {
+  EPA(simplex, colliderA, colliderB, transformA, transformB) {
+    if (this.debugMinkowski)
+      Game.scene?.scene.remove(this.debugMinkowski);
+    if (this.debugPolytope)
+      Game.scene?.scene.remove(this.debugPolytope);
+    if (this.debugNormal)
+      Game.scene?.scene.remove(this.debugNormal);
+    if (this.debugFaceA)
+      Game.scene?.scene.remove(this.debugFaceA);
+    if (this.debugFaceB)
+      Game.scene?.scene.remove(this.debugFaceB);
+    if (this.debugFaceAClipped)
+      Game.scene?.scene.remove(this.debugFaceAClipped);
+    if (this.debugFaceBClipped)
+      Game.scene?.scene.remove(this.debugFaceBClipped);
+    if (this.debugFaceBClipped)
+      Game.scene?.scene.remove(this.debugFaceBClipped);
     const polytope = [];
     for (let i = 0; i < simplex.size; i++)
       polytope.push(simplex.points[i]);
@@ -36963,7 +37187,6 @@ class GjkEpa {
       minNormal.set(normals[minFace].x, normals[minFace].y, normals[minFace].z);
       minDistance = normals[minFace].w;
       if (iterations++ > GjkEpa.MAX_EPA_ITERS) {
-        console.error("Too many EPA iterations");
         break;
       }
       const witnessA = colliderA.findFurthestPoint(minNormal);
@@ -37022,18 +37245,12 @@ class GjkEpa {
     }
     if (minDistance == Infinity)
       return;
-    if (this.debugMinkowski)
-      Game.scene?.scene.remove(this.debugMinkowski);
-    if (this.debugPolytope)
-      Game.scene?.scene.remove(this.debugPolytope);
-    if (this.debugNormal)
-      Game.scene?.scene.remove(this.debugNormal);
-    if (Game.debugOverlay && this.debug) {
+    if (Game.debugOverlay && this.debugEPA) {
       this.debugNormal = new ArrowHelper(minNormal);
       this.debugNormal.setColor(65535);
       Game.scene?.scene.add(this.debugNormal);
     }
-    if (Game.debugOverlay && this.debug) {
+    if (Game.debugOverlay && this.debugEPA) {
       const newVertices = [];
       colliderA.verticesWorldSpace.forEach((v1) => {
         colliderB.verticesWorldSpace.forEach((v2) => {
@@ -37051,7 +37268,7 @@ class GjkEpa {
       );
       Game.scene?.scene.add(this.debugMinkowski);
     }
-    if (Game.debugOverlay && this.debug) {
+    if (Game.debugOverlay && this.debugEPA) {
       const points = polytope;
       const bufferGeometry = new BufferGeometry();
       const indices = new Uint32Array(faces);
@@ -37066,20 +37283,131 @@ class GjkEpa {
       this.debugPolytope = new Mesh(bufferGeometry, new MeshBasicMaterial({ color: 16711680, wireframe: true, wireframeLinewidth: 3, transparent: true, opacity: 0.5 }));
       Game.scene?.scene.add(this.debugPolytope);
     }
-    const contactPoint = Vec3.mul(minNormal, minDistance);
-    const barycentric = this.computeBarycentricCoordinates(contactPoint, minPolygon);
-    let a = new Vec3().addScaledVector(minPolygon[0].witnessA, barycentric.x);
-    let b = new Vec3().addScaledVector(minPolygon[1].witnessA, barycentric.y);
-    let c = new Vec3().addScaledVector(minPolygon[2].witnessA, barycentric.z);
-    const p1 = Vec3.add(a, b).add(c);
-    a = new Vec3().addScaledVector(minPolygon[0].witnessB, barycentric.x);
-    b = new Vec3().addScaledVector(minPolygon[1].witnessB, barycentric.y);
-    c = new Vec3().addScaledVector(minPolygon[2].witnessB, barycentric.z);
-    const p2 = Vec3.add(a, b).add(c);
+    const manifold = [];
+    const contact_facesA = [];
+    const contact_facesB = [];
+    const localNormalA = minNormal.clone().applyQuaternion(transformA.q.clone().conjugate());
+    const localNormalB = minNormal.clone().applyQuaternion(transformB.q.clone().conjugate());
+    if (colliderA instanceof MeshCollider) {
+      for (let i = 0; i < colliderA.faces.length; i++) {
+        const face = colliderA.faces[i];
+        const dirDot = Vec3.dot(face.normal, localNormalA);
+        if (dirDot > 0.999999) {
+          const posDot = Vec3.dot(face.center, localNormalA);
+          if (posDot > 0)
+            contact_facesA.push({ face, dist: posDot });
+        }
+      }
+    }
+    if (colliderB instanceof MeshCollider) {
+      for (let i = 0; i < colliderB.faces.length; i++) {
+        const face = colliderB.faces[i];
+        const dirDot = Vec3.dot(face.normal, localNormalB);
+        if (dirDot < -0.999999) {
+          const posDot = Vec3.dot(face.center, localNormalB);
+          if (posDot < 0)
+            contact_facesB.push({ face, dist: posDot });
+        }
+      }
+    }
+    if (contact_facesA.length && contact_facesB.length) {
+      const transformMatrix = new Matrix4();
+      transformMatrix.makeTranslation(0, 0, 0);
+      transformMatrix.makeRotationFromQuaternion(new Quaternion().setFromUnitVectors(minNormal, new Vec3(0, 0, 1)));
+      let projectedPoints2D_A = [];
+      let projectedPoints2D_B = [];
+      contact_facesA.sort((a, b) => b.dist - a.dist);
+      contact_facesB.sort((a, b) => a.dist - b.dist);
+      for (let j = 0; j < contact_facesA.length; j++) {
+        for (let i = 0; i < 3; i++) {
+          const pointA = colliderA.verticesWorldSpace[contact_facesA[j].face.indices[i]];
+          const v3d = pointA.clone().applyMatrix4(transformMatrix);
+          const v2d = new Vector2(v3d.x, v3d.y);
+          let v2d_unique = true;
+          for (const vertex of projectedPoints2D_A) {
+            if (vertex.distanceTo(v2d) < 1e-3)
+              v2d_unique = false;
+          }
+          if (v2d_unique)
+            projectedPoints2D_A.push(v2d);
+        }
+      }
+      for (let j = 0; j < contact_facesB.length; j++) {
+        for (let i = 0; i < 3; i++) {
+          const pointB = colliderB.verticesWorldSpace[contact_facesB[j].face.indices[i]];
+          const v3d = pointB.clone().applyMatrix4(transformMatrix);
+          const v2d = new Vector2(v3d.x, v3d.y);
+          let v2d_unique = true;
+          for (const vertex of projectedPoints2D_B) {
+            if (vertex.distanceTo(v2d) < 1e-3)
+              v2d_unique = false;
+          }
+          if (v2d_unique)
+            projectedPoints2D_B.push(v2d);
+        }
+      }
+      const gs = new GrahamScan();
+      projectedPoints2D_A = gs.setPoints(projectedPoints2D_A).getHull();
+      projectedPoints2D_B = gs.setPoints(projectedPoints2D_B).getHull();
+      let clippedPolygon2D = SutherlandHodgmanClipping(projectedPoints2D_B, projectedPoints2D_A);
+      const inverseTransformMatrix = transformMatrix.clone().invert();
+      const worldFaceNormal_A = contact_facesA[0].face.normal.clone().applyQuaternion(transformA.q);
+      const worldFaceNormal_B = contact_facesB[0].face.normal.clone().applyQuaternion(transformB.q);
+      const worldPoint_A = colliderA.verticesWorldSpace[contact_facesA[0].face.indices[0]];
+      const worldPoint_B = colliderB.verticesWorldSpace[contact_facesB[0].face.indices[0]];
+      const planeA = new Plane(worldFaceNormal_A, -Vec3.dot(worldFaceNormal_A, worldPoint_A));
+      const planeB = new Plane(worldFaceNormal_B, -Vec3.dot(worldFaceNormal_B, worldPoint_B));
+      const clippedPolygon3D_A = [];
+      const clippedPolygon3D_B = [];
+      for (const point2D of clippedPolygon2D) {
+        const point3DHomogeneous = new Vec3(point2D.x, point2D.y, 0).applyMatrix4(inverseTransformMatrix);
+        const point3D_A = new Vec3();
+        const point3D_B = new Vec3();
+        planeA.projectPoint(point3DHomogeneous, point3D_A);
+        planeB.projectPoint(point3DHomogeneous, point3D_B);
+        manifold.push([point3D_A, point3D_B]);
+        clippedPolygon3D_A.push(point3D_A);
+        clippedPolygon3D_B.push(point3D_B);
+      }
+      if (Game.debugOverlay && this.debugClipping) {
+        this.debugFaceA = new LineLoop(
+          new BufferGeometry().setFromPoints(projectedPoints2D_A),
+          new MeshBasicMaterial({ color: 16711680 })
+        );
+        Game.scene?.scene.add(this.debugFaceA);
+        this.debugFaceB = new LineLoop(
+          new BufferGeometry().setFromPoints(projectedPoints2D_B),
+          new MeshBasicMaterial({ color: 65280 })
+        );
+        Game.scene?.scene.add(this.debugFaceB);
+        this.debugFaceAClipped = new LineLoop(
+          new BufferGeometry().setFromPoints(clippedPolygon3D_A),
+          new LineBasicMaterial({ color: 65535, linewidth: 2 })
+        );
+        Game.scene?.scene.add(this.debugFaceAClipped);
+        this.debugFaceBClipped = new LineLoop(
+          new BufferGeometry().setFromPoints(clippedPolygon3D_B),
+          new LineBasicMaterial({ color: 16711935, linewidth: 3 })
+        );
+        Game.scene?.scene.add(this.debugFaceBClipped);
+      }
+    }
+    if (!manifold.length) {
+      const contactPoint = Vec3.mul(minNormal, minDistance);
+      const barycentric = this.computeBarycentricCoordinates(contactPoint, minPolygon);
+      let a = new Vec3().addScaledVector(minPolygon[0].witnessA, barycentric.x);
+      let b = new Vec3().addScaledVector(minPolygon[1].witnessA, barycentric.y);
+      let c = new Vec3().addScaledVector(minPolygon[2].witnessA, barycentric.z);
+      const p1 = Vec3.add(a, b).add(c);
+      a = new Vec3().addScaledVector(minPolygon[0].witnessB, barycentric.x);
+      b = new Vec3().addScaledVector(minPolygon[1].witnessB, barycentric.y);
+      c = new Vec3().addScaledVector(minPolygon[2].witnessB, barycentric.z);
+      const p2 = Vec3.add(a, b).add(c);
+      manifold.push([p1, p2]);
+    }
     return {
-      normal: minNormal,
-      p1,
-      p2,
+      normal: minNormal.negate(),
+      manifold,
       d: minDistance
     };
   }
@@ -37148,24 +37476,23 @@ class GjkEpa {
 }
 
 class XPBDSolver extends BaseSolver {
-  numSubsteps = 20;
+  static numSubsteps = 20;
   narrowPhase = new GjkEpa();
   static h = 0;
-  collisionCount = 0;
   constructor() {
     super();
-    Game.gui.solver.add(Game, "stepPhysics").name("Step (space)");
-    Game.gui.solver.add(this, "numSubsteps", 1, 30);
-    Game.gui.solver.add(this, "collisionCount").listen();
+    Game.gui.solver.add(Game, "stepPhysics").name("Step (w/ space)");
+    Game.gui.solver.add(XPBDSolver, "numSubsteps", 1, 30).step(1);
+    Game.gui.solver.add(RigidBody, "sleepThreshold", 0, 5).step(0.05).name("Sleep threshold (s)");
+    Game.gui.debug.add(RigidBody, "debugSleepState").name("Sleep state");
   }
   update(bodies, constraints, dt, gravity) {
     if (dt === 0)
       return;
-    const h = 1 / 60 / this.numSubsteps;
+    const h = 1 / 60 / XPBDSolver.numSubsteps;
     XPBDSolver.h = h;
     const collisions = this.collectCollisionPairs(bodies, dt);
-    this.collisionCount = collisions.length;
-    for (let i = 0; i < this.numSubsteps; i++) {
+    for (let i = 0; i < XPBDSolver.numSubsteps; i++) {
       const contacts = this.getContacts(collisions);
       for (let j = 0; j < bodies.length; j++)
         bodies[j].integrate(h, gravity);
@@ -37179,6 +37506,11 @@ class XPBDSolver extends BaseSolver {
       this.solveVelocities(contacts, h);
     }
     for (const body of bodies) {
+      if (!body.isDynamic)
+        continue;
+      body.checkSleepState(dt);
+      if (body.isSleeping)
+        continue;
       body.collider.expanded_aabb.copy(body.collider.aabb).expandByScalar(2 * dt * body.vel.length());
       body.force.set(0, 0, 0);
       body.torque.set(0, 0, 0);
@@ -37195,9 +37527,9 @@ class XPBDSolver extends BaseSolver {
         const B = bodies[j];
         if (!B.canCollide)
           continue;
-        if (!A.isDynamic && !B.isDynamic)
-          continue;
         if (A.id == B.id)
+          continue;
+        if ((!A.isDynamic || A.isSleeping) && (!B.isDynamic || B.isSleeping))
           continue;
         const aabb1 = A.collider.expanded_aabb;
         const aabb2 = B.collider.expanded_aabb;
@@ -37247,27 +37579,32 @@ class XPBDSolver extends BaseSolver {
   _meshMeshContact(contacts, A, B) {
     const simplex = this.narrowPhase.GJK(A.collider, B.collider);
     if (simplex) {
-      const EPA = this.narrowPhase.EPA(simplex, A.collider, B.collider);
+      const EPA = this.narrowPhase.EPA(simplex, A.collider, B.collider, A.pose, B.pose);
       if (!EPA)
         return;
-      const { normal, p1, p2, d } = EPA;
+      const { normal, manifold, d } = EPA;
       if (d <= 0)
         return;
-      const contact = new ContactSet(
-        A,
-        B,
-        normal.clone().negate(),
-        p1,
-        p2
-      );
-      contacts.push(contact);
-      this.debugContact(contact);
+      for (const item of manifold) {
+        const contact = new ContactSet(
+          A,
+          B,
+          normal,
+          item[0],
+          item[1]
+        );
+        contacts.push(contact);
+        this.debugContact(contact);
+      }
+      A.hasStableContact = manifold.length >= 4;
+      B.hasStableContact = manifold.length >= 4;
     }
   }
   _meshPlaneContact(contacts, A, B) {
     const MC = A.collider;
     const PC = B.collider;
     const N = new Vec3().copy(PC.normal);
+    let contactCount = 0;
     for (let i = 0; i < MC.uniqueIndices.length; i++) {
       const r1 = MC.vertices[MC.uniqueIndices[i]];
       const p1 = MC.verticesWorldSpace[MC.uniqueIndices[i]];
@@ -37277,9 +37614,12 @@ class XPBDSolver extends BaseSolver {
       const d = -signedDistance;
       if (d <= 0)
         continue;
+      contactCount++;
       const contact = new ContactSet(A, B, N, p1, p2, r1, r2);
       contacts.push(contact);
     }
+    A.hasStableContact = contactCount >= 4;
+    B.hasStableContact = contactCount >= 4;
   }
   solvePositions(contacts, h) {
     for (const contact of contacts) {
@@ -37641,9 +37981,9 @@ class World {
   solver;
   constructor() {
     this.solver = new XPBDSolver();
-    Game.gui.physics.add(this.gravity, "x", -10, 10).step(0.1).name("Gravity x");
-    Game.gui.physics.add(this.gravity, "y", -10, 10).step(0.1).name("Gravity y");
-    Game.gui.physics.add(this.gravity, "z", -10, 10).step(0.1).name("Gravity z");
+    Game.gui.physics.add(this.gravity, "x", -50, 50).step(0.1).name("Gravity x");
+    Game.gui.physics.add(this.gravity, "y", -50, 50).step(0.1).name("Gravity y");
+    Game.gui.physics.add(this.gravity, "z", -50, 50).step(0.1).name("Gravity z");
     Game.gui.debug.add(World, "enableDebugAABBs").name("AABBs");
     Game.gui.debug.add(World, "enableDebugConvexHulls").name("Convex hulls");
     Game.gui.debug.add(World, "enableDebugOverlay").name("Enable overlays");
@@ -37657,6 +37997,7 @@ class World {
       } else {
         if (!e.body)
           return;
+        e.body.wake();
         this.#grabDistance = e.intersection.distance;
         const localPos = e.body.worldToLocal(e.intersection.point);
         this.#grabConstraint = new Attachment(localPos, screenPos).setBodies(e.body, null).setStiffness(e.body.mass * 500).setDamping(e.body.mass * 100, e.body.mass * 1);
@@ -37687,6 +38028,8 @@ class World {
     BaseSolver.ddIdx = 0;
     this.solver.update(this.#bodies, this.#constraintsFast, dt, this.gravity);
     if (this.#grabConstraint) {
+      this.#grabConstraint.body0?.wake();
+      this.#grabConstraint.body1?.wake();
       const F = this.#grabConstraint?.getForce(XPBDSolver.h).length().toFixed(2);
       document.getElementById("constraint-force").innerText = `Grab force: ${F} N`;
     }
@@ -37711,18 +38054,36 @@ class World {
       );
     renderer.autoClear = true;
   }
+  destroy() {
+    this.#bodies = [];
+    while (World.debugOverlays.children.length > 0) {
+      World.debugOverlays.remove(World.debugOverlays.children[0]);
+    }
+    while (World.debugAABBs.children.length > 0) {
+      World.debugAABBs.remove(World.debugAABBs.children[0]);
+    }
+    while (World.debugConvexHulls.children.length > 0) {
+      World.debugConvexHulls.remove(World.debugConvexHulls.children[0]);
+    }
+  }
 }
 
 class RigidBody {
   id = 0;
+  pose = new Pose();
+  isDynamic = true;
+  canCollide = true;
+  hasStableContact = false;
+  canSleep = true;
+  isSleeping = false;
+  sleepTimer = 0;
+  static sleepThreshold = 0.2;
+  // Seconds
+  static debugSleepState = false;
   mesh;
   collider;
-  pose = new Pose();
-  prevPose = new Pose();
   vel = new Vec3(0, 0, 0);
   omega = new Vec3(0, 0, 0);
-  velPrev = new Vec3(0, 0, 0);
-  omegaPrev = new Vec3(0, 0, 0);
   invMass = 1;
   invInertia = new Vec3(1, 1, 1);
   get mass() {
@@ -37741,10 +38102,10 @@ class RigidBody {
   staticFriction = 0.5;
   dynamicFriction = 0.4;
   restitution = 0.4;
-  // coefficient of restitution (e)
-  isDynamic = true;
-  canCollide = true;
-  static maxRotationPerSubstep = 0.5;
+  // 'private':
+  prevPose = new Pose();
+  velPrev = new Vec3(0, 0, 0);
+  omegaPrev = new Vec3(0, 0, 0);
   constructor(collider, mesh) {
     this.collider = collider;
     if (mesh) {
@@ -37826,6 +38187,7 @@ class RigidBody {
     this.invMass = 0;
     this.invInertia = new Vec3(0);
     this.prevPose.copy(this.pose);
+    this.collider.expanded_aabb.copy(this.collider.aabb);
     this.updateGeometry();
     this.updateCollider();
     return this;
@@ -37844,7 +38206,7 @@ class RigidBody {
   setCylinder(radius, height, density = 1) {
     const r2 = Math.pow(height, 2);
     const h2 = Math.pow(radius, 2);
-    let mass = Math.PI * r2 * height * density;
+    const mass = Math.PI * r2 * height * density;
     this.invMass = 1 / mass;
     const I_axial = 0.5 * mass * r2;
     const I_radial = 1 / 12 * mass * (3 * r2 + h2);
@@ -37863,7 +38225,7 @@ class RigidBody {
   getInverseMass(normal, pos = null) {
     if (!this.isDynamic)
       return 0;
-    let n = new Vec3();
+    const n = new Vec3();
     if (pos === null)
       n.copy(normal);
     else {
@@ -37879,7 +38241,7 @@ class RigidBody {
   applyCorrection(corr, pos = null, velocityLevel = false) {
     if (!this.isDynamic)
       return;
-    let dq = new Vec3();
+    const dq = new Vec3();
     if (pos === null)
       dq.copy(corr);
     else {
@@ -37903,10 +38265,11 @@ class RigidBody {
       this.applyRotation(dq);
   }
   applyRotation(rot, scale = 1) {
-    let phi = rot.length();
-    if (phi * scale > RigidBody.maxRotationPerSubstep)
-      scale = RigidBody.maxRotationPerSubstep / phi;
-    let dq = new Quaternion(
+    const maxPhi = 0.5;
+    const phi = rot.length();
+    if (phi * scale > maxPhi)
+      scale = maxPhi / phi;
+    const dq = new Quaternion(
       rot.x * scale,
       rot.y * scale,
       rot.z * scale,
@@ -37925,20 +38288,22 @@ class RigidBody {
     if (!this.isDynamic)
       return;
     this.prevPose.copy(this.pose);
+    if (this.isSleeping)
+      return;
     this.vel.add(Vec3.mul(gravity, this.gravity * dt));
     this.vel.add(Vec3.mul(this.force, this.invMass * dt));
-    this.omega.addScaledVector(this.torque.clone().multiply(this.invInertia), dt);
     this.pose.p.addScaledVector(this.vel, dt);
+    this.omega.addScaledVector(this.torque.clone().multiply(this.invInertia), dt);
     this.applyRotation(this.omega, dt);
   }
   update(dt) {
-    if (!this.isDynamic)
+    if (!this.isDynamic || this.isSleeping)
       return;
     this.velPrev.copy(this.vel);
     this.omegaPrev.copy(this.omega);
     this.vel.subVectors(this.pose.p, this.prevPose.p);
     this.vel.multiplyScalar(1 / dt);
-    let dq = new Quaternion();
+    const dq = new Quaternion();
     dq.multiplyQuaternions(this.pose.q, this.prevPose.q.conjugate());
     this.omega.set(
       dq.x * 2 / dt,
@@ -37950,6 +38315,7 @@ class RigidBody {
     this.updateCollider();
   }
   applyForceW(force, worldPos = new Vec3(0, 0, 0)) {
+    this.wake();
     const F = force.clone();
     this.force.add(F);
     this.torque.add(F.cross(this.pose.p.clone().sub(worldPos)));
@@ -37973,6 +38339,56 @@ class RigidBody {
   worldToLocal(v) {
     return new Vec3().copy(v).sub(this.pose.p).applyQuaternion(this.pose.q.clone().conjugate());
   }
+  setCanSleep(state = true) {
+    this.canSleep = state;
+    return this;
+  }
+  checkSleepState(dt) {
+    if (!this.canSleep)
+      return;
+    const velLen = this.vel.lengthSq();
+    const omegaLen = this.omega.lengthSq();
+    const thresh = 1e-3;
+    if (this.isSleeping) {
+      if (velLen > thresh || omegaLen > thresh)
+        this.wake();
+    } else {
+      if (this.hasStableContact) {
+        if (velLen < thresh && omegaLen < thresh) {
+          if (this.sleepTimer > RigidBody.sleepThreshold) {
+            this.sleep();
+          } else {
+            this.sleepTimer += dt;
+          }
+        }
+      }
+    }
+  }
+  sleep() {
+    if (this.isSleeping)
+      return this;
+    this.vel.set(0, 0, 0);
+    this.omega.set(0, 0, 0);
+    this.velPrev.set(0, 0, 0);
+    this.omegaPrev.set(0, 0, 0);
+    this.isSleeping = true;
+    if (RigidBody.debugSleepState) {
+      const mat = this.mesh?.material;
+      mat.color = new Color$1(30583);
+    }
+    return this;
+  }
+  wake() {
+    if (!this.isSleeping)
+      return this;
+    this.isSleeping = false;
+    this.sleepTimer = 0;
+    if (RigidBody.debugSleepState) {
+      const mat = this.mesh?.material;
+      mat.color = new Color$1(65535);
+    }
+    return this;
+  }
 }
 
 class BaseScene {
@@ -37983,6 +38399,7 @@ class BaseScene {
   meshes = [];
   world = new World();
   initialized = false;
+  gui;
   constructor() {
     this.scene = new Scene();
     this.camera = new PerspectiveCamera(70, 1, 0.1, 5e3);
@@ -38026,6 +38443,12 @@ class BaseScene {
   init() {
   }
   update(time, dt, keys) {
+  }
+  destroy() {
+    while (this.scene.children.length > 0) {
+      this.scene.remove(this.scene.children[0]);
+    }
+    this.world.destroy();
   }
   updatePhysics(dt, enabled = true) {
     if (enabled)
@@ -38247,9 +38670,23 @@ class BaseDebugScene extends Scene {
 class DebugScene extends BaseScene {
   init() {
     this.insert(new BaseDebugScene());
-    Box(3, 1, 3).setWireframe(true).setPos(0, 0.5, 0).addTo(this);
-    Box(2, 1, 1).setWireframe(true).setPos(1.5, 5, 0).addTo(this);
+    Box(4, 2, 3).setWireframe(true).setPos(2, 2, 0).setCanSleep(false).setRotation(0, 0, 0.2).setStatic().addTo(this);
+    const coinSize = new Vector2(1, 1);
+    const coinMesh = new Mesh(
+      new CylinderGeometry(coinSize.x, coinSize.x, coinSize.y, 12, 1),
+      new MeshBasicMaterial({
+        wireframe: true,
+        color: new Color$1().setHSL(0.5, 1, 0.5)
+      })
+    );
+    new RigidBody(
+      new MeshCollider().setGeometry(coinMesh.geometry)
+    ).setMesh(coinMesh).setPos(2, 4, 0).setCanSleep(false).setCylinder(coinSize.x, coinSize.y, 1).addTo(this);
     this.addGround();
+  }
+  update(time, dt, keys) {
+    if (keys.KeyA)
+      this.world.bodies[0].setRotation(0, time, 0);
   }
 }
 
@@ -38257,13 +38694,13 @@ class DominosScene extends BaseScene {
   init() {
     this.insert(new BaseLightingScene());
     for (let i = 0; i < 20; i++) {
-      const b = Box(1, 2, 0.2).setPos(0, 1, -i * 1).setFriction(1, 1).addTo(this);
+      const b = Box(1, 2, 0.2, 5).setPos(0, 1, -i * 1).setFriction(0.7, 0.7).addTo(this);
       if (i == 0)
         b.omega.x = -1;
     }
     for (let i = 0; i < 10; i++) {
-      const size = 1 + i * 0.5;
-      const b = Box(1 * size, 2 * size, 0.4 * size / 2).setPos(-7, 1 * size, -i * Math.pow(size, 0.5) * 1).setFriction(0.7, 0.7).addTo(this);
+      const size = 1.5 + i * 0.6;
+      const b = Box(1 * size, 2 * size, 0.4 * size / 2).setPos(-7, 1 * size, -i * Math.pow(size, 0.6) * 1).setFriction(0.4, 0.3).addTo(this);
       if (i == 0)
         b.omega.x = -1;
     }
@@ -38367,7 +38804,52 @@ class StackedBoxesScene extends BaseScene {
     this.insert(new OmgScene());
     const d = 1;
     for (let i = 0; i < 5; i++) {
-      Box(d).setPos(0, d - d / 2 + 0.05 + d * i, 0).addTo(this);
+      Box(d, d, d, 1).setFriction(1, 1).setPos(0, d - d / 2 + 0.05 + d * i, 0).addTo(this);
+    }
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        for (let k = 0; k < 3; k++) {
+          Box(d, d, d, 1).setPos(
+            -5 + d * k * 1.01,
+            d / 2 + d * i * 1.01,
+            d * j * 1.01
+          ).addTo(this);
+        }
+      }
+    }
+    this.addGround();
+  }
+}
+
+class JengaScene extends BaseScene {
+  init() {
+    this.insert(new BaseLightingScene());
+    const scale = 1;
+    const l = 7.5 * scale;
+    const h = 1.5 * scale;
+    const w = 2.5 * scale;
+    const density = 1 * scale;
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 3; j++) {
+        let b;
+        if (i % 2 == 0) {
+          b = Box(w, h, l, density);
+          b.setPos(
+            j * (w * 1.02),
+            h - h / 2 + h * i * 1.01,
+            w
+          );
+        } else {
+          b = Box(l, h, w, density);
+          b.setPos(
+            w,
+            h - h / 2 + h * i * 1.01,
+            j * (w * 1.02)
+          );
+        }
+        b.setFriction(0.6, 0.6);
+        b.addTo(this);
+      }
     }
     this.addGround();
   }
@@ -38519,6 +39001,24 @@ class StressTestScene extends BaseScene {
   }
 }
 
+class FrictionScene extends BaseScene {
+  box;
+  init() {
+    this.insert(new BaseLightingScene());
+    Box(3, 2, 15).setPos(0, 2, -3).setCanSleep(false).setRotation(0.3, 0, 0).setStatic().setFriction(1, 1).addTo(this);
+    this.box = Box(1, 1, 1).setCanSleep(false).setFriction(1, 1).addTo(this);
+    this.addGround();
+    this.initBox();
+    this.gui.add(this.box, "staticFriction", 0, 1).onChange(this.initBox.bind(this));
+    this.gui.add(this.box, "dynamicFriction", 0, 1).onChange(this.initBox.bind(this));
+    this.gui.open();
+  }
+  initBox() {
+    this.box.setPos(0, 4.5, -5);
+    this.box.setVel(0, 0, 0);
+  }
+}
+
 const style = '';
 
 const game = new Game("canvas");
@@ -38530,6 +39030,8 @@ async function init() {
       "Playground": PlayGroundScene,
       "Dominos": DominosScene,
       "StackedBoxes": StackedBoxesScene,
+      "Jenga": JengaScene,
+      "Friction": FrictionScene,
       "Constraints": ConstraintScene,
       "Rope": RopeScene,
       "DragonTail": DragonTailScene,
